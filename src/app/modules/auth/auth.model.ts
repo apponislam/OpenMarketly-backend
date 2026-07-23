@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import crypto from "crypto";
 import { User } from "./auth.interface";
 
 const userSchemaDefinition: any = {
@@ -26,6 +27,22 @@ const userSchemaDefinition: any = {
         enum: ["ADMIN", "USER"],
         default: "USER",
         required: true,
+    },
+
+    gender: {
+        type: String,
+        enum: ["MALE", "FEMALE", "OTHER"],
+    },
+
+    referralCode: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
+
+    referredBy: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
     },
 
     phone: {
@@ -106,6 +123,22 @@ const UserSchema = new Schema<User>(userSchemaDefinition, {
     },
 });
 
+// Pre-save hook to generate a unique referralCode if not already set
+UserSchema.pre("save", async function () {
+    if (!this.referralCode) {
+        let code = "";
+        let isUnique = false;
+        while (!isUnique) {
+            code = crypto.randomBytes(4).toString("hex").toUpperCase();
+            const existingUser = await mongoose.models.User.findOne({ referralCode: code });
+            if (!existingUser) {
+                isUnique = true;
+            }
+        }
+        this.referralCode = code;
+    }
+});
+
 // Authentication lookup (optimized for isDeleted filtering)
 UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ email: 1, isDeleted: 1 });
@@ -114,6 +147,8 @@ UserSchema.index({ role: 1, isDeleted: 1 });
 UserSchema.index({ isActive: 1, isDeleted: 1 });
 UserSchema.index({ isEmailVerified: 1, isDeleted: 1 });
 UserSchema.index({ groupId: 1, isDeleted: 1 });
+UserSchema.index({ referralCode: 1 }, { unique: true, sparse: true });
+UserSchema.index({ referredBy: 1 });
 
 // Token & OTP lookup indexes (important for auth flows)
 UserSchema.index({ resetPasswordToken: 1, isDeleted: 1 });

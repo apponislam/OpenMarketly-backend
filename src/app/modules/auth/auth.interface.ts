@@ -2,15 +2,24 @@ import { Types } from "mongoose";
 
 export type UserRole = "ADMIN" | "USER";
 
+export enum Gender {
+    MALE = "MALE",
+    FEMALE = "FEMALE",
+    OTHER = "OTHER",
+}
+
 export interface User {
     name: string;
     email: string;
     password: string;
     role: UserRole;
+    gender?: Gender;
     phone?: string;
     profileImage?: string;
     language?: string;
     aboutme?: string;
+    referralCode?: string;
+    referredBy?: Types.ObjectId;
     address?: {
         street?: string;
         city?: string;
