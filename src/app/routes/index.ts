@@ -18,6 +18,7 @@ import { bannerRoutes } from "../modules/banner/banner.routes";
 import { settingsRoutes } from "../modules/settings/settings.routes";
 import { recentlyViewedRoutes } from "../modules/recentlyViewed/recentlyViewed.routes";
 import { activityRoutes } from "../modules/activity/activity.routes";
+import { withdrawRoutes } from "../modules/withdraw/withdraw.routes";
 
 const router = express.Router();
 
@@ -97,6 +98,10 @@ const moduleRoutes = [
     {
         path: "/activities",
         route: activityRoutes,
+    },
+    {
+        path: "/withdraws",
+        route: withdrawRoutes,
     },
 ];
 
