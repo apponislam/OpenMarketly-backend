@@ -26,6 +26,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
         minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
         isFeatured: req.query.isFeatured as string | undefined,
+        isTodayDeal: req.query.isTodayDeal as string | undefined,
         sellerId: req.query.sellerId as string | undefined,
         sortBy: req.query.sortBy as string | undefined,
         sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,

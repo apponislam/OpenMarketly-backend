@@ -137,6 +137,10 @@ const productSchemaDefinition: any = {
         type: Boolean,
         default: false,
     },
+    isTodayDeal: {
+        type: Boolean,
+        default: false,
+    },
     isActive: {
         type: Boolean,
         default: true,
@@ -189,6 +193,7 @@ ProductSchema.index({ seller: 1, isDeleted: 1 });
 ProductSchema.index({ brand: 1, isDeleted: 1 });
 ProductSchema.index({ price: 1, isDeleted: 1 });
 ProductSchema.index({ isFeatured: 1, isDeleted: 1 });
+ProductSchema.index({ isTodayDeal: 1, isDeleted: 1 });
 ProductSchema.index({ isActive: 1, isDeleted: 1 });
 
 export const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);
