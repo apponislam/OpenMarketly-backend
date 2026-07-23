@@ -7,7 +7,7 @@ import { visitorRoutes } from "../modules/visitor/visitor.routes";
 import { categoryRoutes } from "../modules/category/category.routes";
 import { productRoutes } from "../modules/product/product.routes";
 import { ratingRoutes } from "../modules/rating/rating.routes";
-import { favoriteRoutes } from "../modules/favorite/favorite.routes";
+import { wishlistRoutes } from "../modules/wishlist/wishlist.routes";
 import { policyRoutes } from "../modules/policy/policy.routes";
 import { cartRoutes } from "../modules/cart/cart.routes";
 import { orderRoutes } from "../modules/order/order.routes";
@@ -54,8 +54,8 @@ const moduleRoutes = [
         route: ratingRoutes,
     },
     {
-        path: "/favorites",
-        route: favoriteRoutes,
+        path: "/wishlists",
+        route: wishlistRoutes,
     },
     {
         path: "/policies",

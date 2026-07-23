@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface IFavorite {
+export interface IWishlist {
     _id?: Types.ObjectId;
     user: Types.ObjectId;
     product: Types.ObjectId;
