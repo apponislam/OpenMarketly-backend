@@ -29,22 +29,23 @@ OpenMarketly is a premium, multi-vendor e-commerce backend engine designed for h
 *   **N-Level Nested Categories:** Implemented using a self-referencing `parentCategory` model. Product searches on parent categories recursively resolve and return items from all descendant subcategories.
 *   **Smart Pricing & Variants:** Supports variables like color, size, and stock. Pre-save hooks automatically calculate sale prices based on original prices and discount percentages for both base products and variants.
 *   **Auto SKU Generation:** Generates structural SKUs (e.g. `SKU-XXXXXX-COLOR-SIZE`) dynamically upon saving if not provided.
-*   **Deals tagging:** Optimized index lookups for `isFeatured`, `isTodayDeal`, and `isTrending` flags.
+*   **Deals Tagging:** Optimized index lookups for `isFeatured`, `isTodayDeal`, and `isTrending` flags.
 
-### 💳 Cart, Wishlist, & Recently Viewed Services
+### 🛒 Cart, Wishlist, & Recently Viewed Services
 *   **Carts:** Full cart manipulation API supporting guest checkout sync capabilities.
 *   **Wishlists:** Clean toggling endpoints that resolve product wishlist status per authenticated user.
 *   **Recently Viewed:** Silent background tracking of viewed products per user, capped at the 20 most recent entries with database cleanup optimization.
 
-### 💸 Payments & Refunds (SSLCommerz)
+### 💸 Payments & Payouts (SSLCommerz & Seller Withdrawals)
 *   **SSLCommerz Gateway:** Handles initial checkout, validation, redirect routing (success, cancel, fail), and IPN (Instant Payment Notification) transactions.
 *   **Seller Balance Credit:** Internally manages wallets. Successfully completed checkouts automatically compute and credit seller balances.
+*   **Withdrawal System:** Since SSLCommerz only acquires money from buyers (does not support payouts), seller withdrawals are processed via a request-review workflow. Sellers request cashouts via Bank or Mobile banking (bKash/Nagad/Rocket), holding the balance. Admins review, manually transfer funds, and approve or reject the request.
 *   **Refund Integration:** Resolving refund disputes calls the SSLCommerz refund API to return payments to customer accounts automatically.
 
 ### ⚖️ Moderation & Auditing
 *   **Dispute Claims:** Supports `REFUND`, `RETURN`, and `COMPLAINT` tickets raised by customers against orders.
 *   **Report Tickets:** Customers can report suspicious products or users to keep the platform clean.
-*   **Background Logging:** Tracks every mutation (Auth changes, catalog edits, settings revisions) in a secure, queryable audit trail database capturing the action, user, timestamp, client IP, and browser client.
+*   **Background Logging:** Tracks every mutation (Auth changes, catalog edits, settings revisions, withdrawals) in a secure, queryable audit trail database capturing the action, user, timestamp, client IP, and browser client.
 
 ---
 
@@ -53,7 +54,7 @@ OpenMarketly is a premium, multi-vendor e-commerce backend engine designed for h
 *   **Runtime:** Node.js (v18 or higher recommended)
 *   **Backend Framework:** Express.js with TypeScript
 *   **Database:** MongoDB via Mongoose
-*   **Type Checker:** strict-mode TypeScript compilation
+*   **Type Checker:** Strict-mode TypeScript compilation
 *   **Payment Gateway:** SSLCommerz API
 *   **Logging Engine:** Custom async audit services
 
@@ -75,6 +76,7 @@ erDiagram
     User ||--o{ RecentlyViewed : "visits"
     User ||--o{ Dispute : "raises"
     User ||--o{ Report : "reports"
+    User ||--o{ Withdraw : "requests"
     User ||--o{ ActivityLog : "triggers"
     
     Category ||--o{ Category : "parentCategory (self-ref)"
@@ -89,62 +91,47 @@ erDiagram
 ```
 
 ### 1. User Schema (`User`)
-*   **Fields:**
-    *   `name`: `String` (Required)
-    *   `email`: `String` (Required, Unique, Lowercase)
-    *   `password`: `String` (Required, Encrypted)
-    *   `role`: `String` (Enum: `SUPER_ADMIN`, `ADMIN`, `SELLER`, `CUSTOMER`, Default: `CUSTOMER`)
-    *   `balance`: `Number` (Default: `0` - managed internally by system transactions)
-    *   `referralCode`: `String` (Unique, auto-generated)
-    *   `referredBy`: `ObjectId` (Ref: `User`)
-    *   `isActive`: `Boolean` (Default: `true`)
-    *   `isEmailVerified`: `Boolean` (Default: `false`)
+*   **Purpose:** Houses credentials, roles, referral links, and internally-managed wallets.
+*   **Fields:** `name`, `email`, `password`, `role`, `balance`, `referralCode`, `referredBy` (Self-ref User `ObjectId`), `isActive`, `isEmailVerified`.
+*   **Indices:** Unique index on `email`, unique index on `referralCode`.
 
 ### 2. Product Schema (`Product`)
-*   **Fields:**
-    *   `name`: `String` (Required)
-    *   `slug`: `String` (Unique, auto-generated)
-    *   `sku`: `String` (Unique, auto-generated)
-    *   `category`: `ObjectId` (Ref: `Category`, Required)
-    *   `seller`: `ObjectId` (Ref: `User`, Required)
-    *   `price`: `Number` (Calculated dynamically on pre-save)
-    *   `originalPrice`: `Number`
-    *   `discountPercentage`: `Number`
-    *   `isFeatured`: `Boolean` (Default: `false`)
-    *   `isTodayDeal`: `Boolean` (Default: `false`)
-    *   `isTrending`: `Boolean` (Default: `false`)
-    *   `variants`: `Array` of `IProductVariant` (Subschema containing color, size, price, originalPrice, discountPercentage, stockQuantity, sku)
+*   **Purpose:** Represents items listed by sellers. Supports variants and automated discount calculations.
+*   **Fields:** `name`, `slug`, `sku`, `category` (`Category` `ObjectId`), `seller` (`User` `ObjectId`), `price`, `originalPrice`, `discountPercentage`, `isFeatured`, `isTodayDeal`, `isTrending`, `variants` (Subdocument Array of color/size/price/sku).
+*   **Indices:** Compound text index on `name`, `description`, `brand`, and `tags` for search. Single indexes on `category`, `seller`, `price`, `isFeatured`, `isTodayDeal`, `isTrending`.
 
 ### 3. Category Schema (`Category`)
-*   **Fields:**
-    *   `name`: `String` (Required)
-    *   `slug`: `String` (Unique)
-    *   `parentCategory`: `ObjectId` (Ref: `Category`, Self-reference)
-    *   `isActive`: `Boolean` (Default: `true`)
-    *   `isDeleted`: `Boolean` (Default: `false`)
+*   **Purpose:** Self-referential tree supporting hierarchical navigation.
+*   **Fields:** `name`, `slug`, `parentCategory` (Self-ref Category `ObjectId`), `isActive`, `isDeleted`.
+*   **Indices:** Unique slug, single index on `parentCategory`.
 
 ### 4. Order Schema (`Order`)
-*   **Fields:**
-    *   `user`: `ObjectId` (Ref: `User`, Required)
-    *   `items`: `Array` of `IOrderItem` (Product, quantity, price, color, size)
-    *   `totalPrice`: `Number`
-    *   `shippingAddress`: `IShippingAddress`
-    *   `paymentStatus`: `String` (Enum: `PENDING`, `PAID`, `FAILED`, `CANCELLED`)
-    *   `orderStatus`: `String` (Enum: `PENDING`, `PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELLED`)
-    *   `transactionId`: `String` (Unique)
+*   **Purpose:** Represents checkout items, payment statuses, and transaction details.
+*   **Fields:** `user` (`User` `ObjectId`), `items` (Array of Product reference, quantity, price, color, size), `totalPrice`, `paymentStatus`, `orderStatus`, `transactionId`.
+*   **Indices:** Unique index on `transactionId`.
 
 ### 5. Wishlist Schema (`Wishlist`)
-*   **Compound Constraint:** Unique index `{ user: 1, product: 1 }` prevents redundant records.
-*   **Fields:**
-    *   `user`: `ObjectId` (Ref: `User`, Required)
-    *   `product`: `ObjectId` (Ref: `Product`, Required)
+*   **Purpose:** Maps products saved by customers.
+*   **Indices:** Unique compound index `{ user: 1, product: 1 }` prevents redundant records.
 
 ### 6. Recently Viewed Schema (`RecentlyViewed`)
-*   **Performance Optimization:** Compounded index `{ user: 1, viewedAt: -1 }` guarantees fast dashboard retrieval, while unique index `{ user: 1, product: 1 }` enables upserts when a user views an item again.
+*   **Purpose:** Fast, rolling list of viewed products per authenticated session.
+*   **Indices:** Unique compound index `{ user: 1, product: 1 }` for upserts, and index `{ user: 1, viewedAt: -1 }` for fast retrieval.
+
+### 7. Withdraw Schema (`Withdraw`)
+*   **Purpose:** Tracks seller payout requests and their bank or mobile financial details.
 *   **Fields:**
-    *   `user`: `ObjectId` (Ref: `User`, Required)
-    *   `product`: `ObjectId` (Ref: `Product`, Required)
-    *   `viewedAt`: `Date` (Default: `Date.now`)
+    *   `seller`: `ObjectId` (Ref: `User`, Required)
+    *   `amount`: `Number` (Required, Minimum: `100 BDT`)
+    *   `paymentMethod`: `String` (Enum: `BANK`, `BKASH`, `NAGAD`, `ROCKET`)
+    *   `paymentDetails`: `Object` (accountName, accountNumber, bankName, branchName, routingNumber)
+    *   `status`: `String` (Enum: `PENDING`, `APPROVED`, `REJECTED`)
+    *   `adminNote`: `String`
+*   **Indices:** Index on `{ seller: 1, status: 1 }`, and `{ status: 1, createdAt: -1 }`.
+
+### 8. Activity Log Schema (`ActivityLog`)
+*   **Purpose:** Audit trail of critical administration, security, and checkout activities.
+*   **Indices:** Index on `{ user: 1, createdAt: -1 }` and `{ action: 1, createdAt: -1 }`.
 
 ---
 
@@ -213,6 +200,14 @@ erDiagram
 | `GET` | `/my` | Auth | Fetch customer order history |
 | `GET` | `/:id` | Auth | Get details for specific order |
 
+### 💸 Withdraw Module (`/api/v1/withdraws`)
+| Method | Route | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/` | Seller | Request a new withdrawal (holds balance) |
+| `GET` | `/my` | Seller | Get history of own withdrawal requests |
+| `GET` | `/` | Admin | List all withdrawal requests (supports `?status=PENDING` filter) |
+| `PATCH`| `/:id/resolve`| Admin | Resolve request (sets status to `APPROVED` or `REJECTED`) |
+
 ### ⚖️ Disputes Module (`/api/v1/disputes`)
 | Method | Route | Access | Description |
 | :--- | :--- | :--- | :--- |
@@ -260,23 +255,28 @@ erDiagram
                                                       [Deduct Inventory]  [Credit Seller Balance]
 ```
 
-### 2. Recursive Category Resolution Flow
+### 2. Seller Payout / Withdrawal Flow
 ```
-[User searches category: Electronics]
-                 │
-                 ▼
-[FindDescendants Service (Recursively finds child categories)]
-                 │
-                 ├─> Mobile Phones
-                 │      └─> Android (Found Leaf)
-                 └─> Computers
-                        └─> Laptops (Found Leaf)
-                 │
-                 ▼
-[Constructs filter: { category: { $in: [Electronics, Mobile Phones, Android, Computers, Laptops] } }]
-                 │
-                 ▼
-[Returns all products under root & child categories]
+[Seller requests payout] ──> [Verify balance >= requested amount]
+                                           │
+                                           ▼
+                                 [Hold funds from wallet]
+                                           │
+                                           ▼
+                                 [Create request PENDING]
+                                           │
+                                           ▼
+                              [Admin reviews request details]
+                                           │
+                        ┌──────────────────┴──────────────────┐
+                        ▼                                     ▼
+                [Admin rejects request]               [Admin manually transfers bank cash]
+                        │                                     │
+                        ▼                                     ▼
+            [Refund funds back to seller]             [Admin marks request APPROVED]
+                        │                                     │
+                        ▼                                     ▼
+            [Set Request status REJECTED]             [Set Request status APPROVED]
 ```
 
 ---
@@ -320,13 +320,14 @@ activityServices.logActivity(
 │   │       ├── activity/       # Auditing & Logging
 │   │       ├── banner/         # Ads and Slides
 │   │       ├── cart/           # Shopping Cart logic
-│   │       ├── category/       # Hierarchical collections
+│   │       ├── category/       # Hierarchical categories
 │   │       ├── coupon/         # Promo codes
 │   │       ├── dispute/        # Disputes & refunds gateway
 │   │       ├── product/        # Item definitions & inventory
 │   │       ├── recentlyViewed/ # Silent user history sync
 │   │       ├── report/         # Moderation tickets
-│   │       ├── settings/       # E-Commerce configuration settings
+│   │       ├── settings/       # E-Commerce configurations
+│   │       ├── withdraw/       # Seller balance cashout requests
 │   │       └── wishlist/       # Saved items list
 │   └── utils/                  # Helper classes, email templates, database seeders
 ├── package.json
