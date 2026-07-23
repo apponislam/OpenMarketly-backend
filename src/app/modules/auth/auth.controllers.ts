@@ -16,8 +16,10 @@ const register = catchAsync(async (req: Request, res: Response) => {
         email: data.email,
         password: data.password,
         role: data.role,
+        gender: data.gender,
         phone: data.phone,
         profileImage: data.profileImage,
+        referralCode: data.referralCode,
     };
 
     // Basic validation
@@ -183,6 +185,7 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
     // Construct update data based on the provided fields
     const updateData: any = {
         ...(data.name !== undefined && { name: data.name }),
+        ...(data.gender !== undefined && { gender: data.gender }),
         ...(data.phone !== undefined && { phone: data.phone }),
         ...(data.profileImage !== undefined && { profileImage: data.profileImage }),
         ...(data.language !== undefined && { language: data.language }),

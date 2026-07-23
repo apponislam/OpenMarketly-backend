@@ -1,4 +1,5 @@
 import httpStatus from "http-status";
+import mongoose from "mongoose";
 import ApiError from "../../../errors/ApiError";
 import { jwtHelper } from "../../../utils/jwtHelper";
 import config from "../../config";
@@ -12,6 +13,17 @@ const registerUser = async (data: any) => {
     const existing = await UserModel.findOne({ email: data.email });
     if (existing) throw new ApiError(httpStatus.BAD_REQUEST, "Email already registered. Please sign in.");
 
+    // Handle referralCode from frontend
+    let referrerId = undefined;
+
+    if (data.referralCode) {
+        const referrerUser = await UserModel.findOne({ referralCode: data.referralCode, isDeleted: false });
+        if (!referrerUser) {
+            throw new ApiError(httpStatus.BAD_REQUEST, "Invalid referral code");
+        }
+        referrerId = referrerUser._id;
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, Number(config.bcrypt_salt_rounds));
 
@@ -20,10 +32,14 @@ const registerUser = async (data: any) => {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
+    // Delete referralCode from input so it's not saved directly; pre-save hook generates new user's own referralCode
+    delete data.referralCode;
+
     // Create user
     const userData = {
         ...data,
         password: hashedPassword,
+        referredBy: referrerId,
         isActive: true,
         isEmailVerified: false,
         verificationToken,
@@ -146,7 +162,9 @@ const resendVerificationEmail = async (email: string) => {
 };
 
 const getUserById = async (userId: string) => {
-    const user = await UserModel.findOne({ _id: userId, isDeleted: false }).select("-password");
+    const user = await UserModel.findOne({ _id: userId, isDeleted: false })
+        .select("-password")
+        .populate("referredBy", "name email referralCode profileImage");
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
     return user;
 };
