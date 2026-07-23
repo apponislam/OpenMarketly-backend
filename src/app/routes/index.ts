@@ -17,6 +17,7 @@ import { reportRoutes } from "../modules/report/report.routes";
 import { bannerRoutes } from "../modules/banner/banner.routes";
 import { settingsRoutes } from "../modules/settings/settings.routes";
 import { recentlyViewedRoutes } from "../modules/recentlyViewed/recentlyViewed.routes";
+import { activityRoutes } from "../modules/activity/activity.routes";
 
 const router = express.Router();
 
@@ -92,6 +93,10 @@ const moduleRoutes = [
     {
         path: "/recently-viewed",
         route: recentlyViewedRoutes,
+    },
+    {
+        path: "/activities",
+        route: activityRoutes,
     },
 ];
 
