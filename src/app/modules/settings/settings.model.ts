@@ -53,6 +53,10 @@ const settingsSchemaDefinition: any = {
         type: Boolean,
         default: true,
     },
+    sellerCommissionRate: {
+        type: Number,
+        default: 10, // 10% default commission
+    },
 };
 
 const SettingsSchema = new Schema<ISiteSettings>(settingsSchemaDefinition, {

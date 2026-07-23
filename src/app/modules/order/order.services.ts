@@ -10,6 +10,7 @@ import { validateSSLCommerzPayment, initiateSSLCommerzPayment } from "./sslcomme
 import { UserModel } from "../auth/auth.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
+import { SettingsModel } from "../settings/settings.model";
 
 const checkoutOrder = async (
     userId: string,
@@ -56,14 +57,27 @@ const checkoutOrder = async (
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const transactionId = `TXN-${Date.now()}-${randomSuffix}`;
 
+    // Get current commission rate from settings
+    const settings = await SettingsModel.findOne();
+    const commissionRate = settings?.sellerCommissionRate ?? 10; // default 10%
+
     // Create pending order
-    const orderItems = cart.items.map((item) => ({
-        product: item.product._id,
-        quantity: item.quantity,
-        color: item.color,
-        size: item.size,
-        price: item.price,
-    }));
+    const orderItems = cart.items.map((item) => {
+        const itemTotal = item.price * item.quantity;
+        const adminCommission = Math.round((itemTotal * (commissionRate / 100)) * 100) / 100;
+        const sellerEarnings = Math.round((itemTotal - adminCommission) * 100) / 100;
+
+        return {
+            product: item.product._id,
+            quantity: item.quantity,
+            color: item.color,
+            size: item.size,
+            price: item.price,
+            commissionRate,
+            adminCommission,
+            sellerEarnings,
+        };
+    });
 
     const order = await OrderModel.create({
         user: userId,
@@ -150,11 +164,14 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
             product.stockQuantity = Math.max(0, product.stockQuantity - item.quantity);
             await product.save();
 
-            // Credit seller balance if the product has a seller reference
+            // Credit seller balance (net earnings after site commission) if the product has a seller reference
             if (product.seller) {
-                const earnings = item.price * item.quantity;
+                const commissionRate = item.commissionRate ?? 10;
+                const defaultEarnings = (item.price * item.quantity) * (1 - commissionRate / 100);
+                const netEarnings = Math.round((item.sellerEarnings ?? defaultEarnings) * 100) / 100;
+
                 await UserModel.findByIdAndUpdate(product.seller, {
-                    $inc: { balance: earnings },
+                    $inc: { balance: netEarnings },
                 });
             }
         }

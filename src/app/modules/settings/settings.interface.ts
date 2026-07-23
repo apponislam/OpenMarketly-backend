@@ -22,6 +22,7 @@ export interface ISiteSettings {
     maintenanceMessage?: string;
     allowGuestCheckout: boolean;
     allowSellerRegistration: boolean;
+    sellerCommissionRate?: number; // percentage (e.g. 10 for 10%)
 
     updatedAt?: Date;
 }

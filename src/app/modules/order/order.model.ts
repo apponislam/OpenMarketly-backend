@@ -20,6 +20,18 @@ const orderItemSchema = new Schema<IOrderItem>(
             required: [true, "Price is required"],
             min: [0, "Price cannot be negative"],
         },
+        commissionRate: {
+            type: Number,
+            default: 0,
+        },
+        adminCommission: {
+            type: Number,
+            default: 0,
+        },
+        sellerEarnings: {
+            type: Number,
+            default: 0,
+        },
     },
     { _id: false },
 );

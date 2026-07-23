@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 import http from "http";
 import config from "./app/config";
 import { seedAdmin } from "./app/modules/auth/auth.seed";
+import seedSettings from "./app/modules/settings/settings.seed";
 
 let server: Server;
 
@@ -16,6 +17,7 @@ async function main() {
         server = http.createServer(app);
 
         seedAdmin();
+        seedSettings();
 
         server.listen(Number(config.port), config.ip, () => {
             console.log(`✅ App listening on port ${config.port} on ${config.ip}`);

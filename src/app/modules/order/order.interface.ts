@@ -6,6 +6,9 @@ export interface IOrderItem {
     color?: string;
     size?: string;
     price: number;
+    commissionRate?: number;
+    adminCommission?: number;
+    sellerEarnings?: number;
 }
 
 export interface IShippingAddress {
