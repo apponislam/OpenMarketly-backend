@@ -56,7 +56,22 @@ const getAllProducts = async (query: IProductQuery) => {
     }
 
     if (query.category) {
-        filter.category = query.category;
+        // Recursively find all descendant category IDs so filtering by a parent
+        // also returns products in its children, grandchildren, etc.
+        const allCategoryIds = [query.category];
+        const findDescendants = async (parentIds: string[]) => {
+            const children = await CategoryModel.find({
+                parentCategory: { $in: parentIds },
+                isDeleted: false,
+            }).select("_id");
+            if (children.length > 0) {
+                const childIds = children.map((c) => c._id.toString());
+                allCategoryIds.push(...childIds);
+                await findDescendants(childIds);
+            }
+        };
+        await findDescendants([query.category]);
+        filter.category = { $in: allCategoryIds };
     }
 
     if (query.brand) {
