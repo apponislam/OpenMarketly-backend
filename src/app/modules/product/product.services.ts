@@ -15,6 +15,7 @@ export interface IProductQuery {
     maxPrice?: number;
     isFeatured?: string;
     isTodayDeal?: string;
+    isTrending?: string;
     sellerId?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -106,6 +107,10 @@ const getAllProducts = async (query: IProductQuery, userId?: string) => {
 
     if (query.isTodayDeal !== undefined) {
         filter.isTodayDeal = query.isTodayDeal === "true";
+    }
+
+    if (query.isTrending !== undefined) {
+        filter.isTrending = query.isTrending === "true";
     }
 
     if (query.minPrice !== undefined || query.maxPrice !== undefined) {

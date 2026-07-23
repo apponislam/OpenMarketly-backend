@@ -51,6 +51,7 @@ export interface IProduct {
     tags?: string[];
     isFeatured?: boolean;
     isTodayDeal?: boolean;
+    isTrending?: boolean;
     isActive?: boolean;
     isDeleted?: boolean;
     createdAt?: Date;
