@@ -26,7 +26,7 @@ const cartItemSchema = new Schema<ICartItem>(
             min: [0, "Price cannot be negative"],
         },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const cartSchemaDefinition: any = {
@@ -57,6 +57,6 @@ CartSchema.pre("save", function () {
     this.totalPrice = Math.round(this.totalPrice * 100) / 100;
 });
 
-CartSchema.index({ user: 1 }, { unique: true });
+// CartSchema.index({ user: 1 }, { unique: true });
 
 export const CartModel = mongoose.model<ICart>("Cart", CartSchema);

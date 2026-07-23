@@ -1,7 +1,7 @@
 {
     "name": "OpenMarketly-backend",
     "version": "1.0.0",
-    "description": "Backend API for Bazar Hisab - shared household budget and grocery expense tracking system.",
+    "description": "Backend API for OpenMarketly - multi-vendor e-commerce platform with referrals, carts, disputes, coupons, and SSLCommerz payments.",
     "main": "dist/server.js",
     "scripts": {
         "build": "tsc",
@@ -12,11 +12,13 @@
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
-        "bazar-hisab",
-        "expense-tracker",
-        "grocery-tracker",
-        "household-budget",
-        "shared-expense",
+        "openmarketly",
+        "e-commerce",
+        "multi-vendor",
+        "referral-system",
+        "sslcommerz",
+        "disputes",
+        "coupons",
         "mongodb",
         "express",
         "typescript",
