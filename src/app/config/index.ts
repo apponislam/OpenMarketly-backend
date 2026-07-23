@@ -31,4 +31,10 @@ export default {
     superAdminPassword: process.env.SUPERADMINPASSWORD,
     superAdminEmail: process.env.SUPERADMINEMAIL,
     maps_api_key: process.env.MAPS_API_KEY,
+    ssl: {
+        store_id: process.env.SSL_STORE_ID,
+        store_pass: process.env.SSL_STORE_PASS,
+        is_sandbox: process.env.SSL_IS_SANDBOX === "true",
+    },
+    server_url: process.env.SERVER_URL || "http://localhost:5000",
 };
