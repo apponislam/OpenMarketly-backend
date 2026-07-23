@@ -147,7 +147,6 @@ UserSchema.index({ role: 1, isDeleted: 1 });
 UserSchema.index({ isActive: 1, isDeleted: 1 });
 UserSchema.index({ isEmailVerified: 1, isDeleted: 1 });
 UserSchema.index({ groupId: 1, isDeleted: 1 });
-UserSchema.index({ referralCode: 1 }, { unique: true, sparse: true });
 UserSchema.index({ referredBy: 1 });
 
 // Token & OTP lookup indexes (important for auth flows)
