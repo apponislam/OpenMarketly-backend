@@ -70,6 +70,15 @@ const orderSchemaDefinition: any = {
         required: [true, "Transaction ID is required"],
         unique: true,
     },
+    paymentDetails: {
+        bankTranId: String,
+        cardType: String,
+        cardBrand: String,
+        cardIssuer: String,
+        amount: Number,
+        paymentDate: String,
+        valId: String,
+    },
 };
 
 const OrderSchema = new Schema<IOrder>(orderSchemaDefinition, {

@@ -17,6 +17,16 @@ export interface ISSLCommerzPayload {
     product_category: string;
 }
 
+export interface ISSLCommerzValidationResponse {
+    isValid: boolean;
+    bankTranId?: string;
+    cardType?: string;
+    cardBrand?: string;
+    cardIssuer?: string;
+    amount?: number;
+    paymentDate?: string;
+}
+
 export const initiateSSLCommerzPayment = async (payload: ISSLCommerzPayload) => {
     const store_id = config.ssl.store_id;
     const store_passwd = config.ssl.store_pass;
@@ -80,12 +90,15 @@ export const initiateSSLCommerzPayment = async (payload: ISSLCommerzPayload) => 
         throw new ApiError(httpStatus.BAD_GATEWAY, `SSLCommerz gateway connection error: ${error.message}`);
     }
 };
-export const validateSSLCommerzPayment = async (val_id: string): Promise<boolean> => {
+
+export const validateSSLCommerzPayment = async (val_id: string): Promise<ISSLCommerzValidationResponse> => {
     const store_id = config.ssl.store_id;
     const store_passwd = config.ssl.store_pass;
     const isSandbox = config.ssl.is_sandbox;
 
-    if (!val_id) return false;
+    if (!val_id) {
+        return { isValid: false };
+    }
 
     const validationUrl = isSandbox
         ? `https://sandbox.sslcommerz.com/validator/api/validationserverAPI.php?val_id=${val_id}&store_id=${store_id}&store_passwd=${store_passwd}&format=json`
@@ -93,8 +106,84 @@ export const validateSSLCommerzPayment = async (val_id: string): Promise<boolean
 
     try {
         const response = await axios.get(validationUrl);
-        return response.data && response.data.status === "VALID" || response.data.status === "VALIDATED";
+        const data = response.data;
+
+        if (data && (data.status === "VALID" || data.status === "VALIDATED")) {
+            return {
+                isValid: true,
+                bankTranId: data.bank_tran_id,
+                cardType: data.card_type,
+                cardBrand: data.card_brand,
+                cardIssuer: data.card_issuer,
+                amount: Number(data.amount),
+                paymentDate: data.tran_date,
+            };
+        }
+
+        return { isValid: false };
     } catch (error) {
-        return false;
+        return { isValid: false };
+    }
+};
+
+export interface ISSLCommerzRefundResponse {
+    success: boolean;
+    refundTxnId?: string;
+    message?: string;
+}
+
+export const refundSSLCommerzPayment = async (
+    bankTranId: string,
+    refundAmount: number,
+    remarks: string
+): Promise<ISSLCommerzRefundResponse> => {
+    const store_id = config.ssl.store_id;
+    const store_passwd = config.ssl.store_pass;
+    const isSandbox = config.ssl.is_sandbox;
+
+    if (!store_id || !store_passwd) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "SSLCommerz store configurations are missing");
+    }
+
+    // Refund query endpoint is validator endpoint (merchantTransIDvalidationAPI.php is also used for refund request)
+    const refundUrl = isSandbox
+        ? "https://sandbox.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php"
+        : "https://securepay.sslcommerz.com/validator/api/merchantTransIDvalidationAPI.php";
+
+    const params = new URLSearchParams();
+    params.append("store_id", store_id);
+    params.append("store_passwd", store_passwd);
+    params.append("bank_tran_id", bankTranId);
+    params.append("refund_amount", refundAmount.toString());
+    params.append("refund_remarks", remarks || "Customer Refund Request");
+    params.append("v", "1");
+    params.append("format", "json");
+
+    try {
+        const response = await axios.post(refundUrl, params, {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        });
+
+        const data = response.data;
+        // Check SSLCommerz Refund API Response status
+        if (data && data.status === "success") {
+            return {
+                success: true,
+                refundTxnId: data.ref_id,
+                message: data.errorreason || "Refund requested successfully",
+            };
+        } else {
+            return {
+                success: false,
+                message: data.errorreason || data.failedreason || "Refund request failed",
+            };
+        }
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "SSLCommerz connection error",
+        };
     }
 };

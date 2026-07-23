@@ -26,6 +26,15 @@ export interface IOrder {
     paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELLED";
     orderStatus: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
     transactionId: string;
+    paymentDetails?: {
+        bankTranId?: string;
+        cardType?: string;
+        cardBrand?: string;
+        cardIssuer?: string;
+        amount?: number;
+        paymentDate?: string;
+        valId?: string;
+    };
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -77,8 +77,8 @@ const checkoutOrder = async (
 
 const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
     // Validate transaction with SSLCommerz validator server
-    const isValid = await validateSSLCommerzPayment(val_id);
-    if (!isValid) {
+    const validationResult = await validateSSLCommerzPayment(val_id);
+    if (!validationResult.isValid) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Payment validation failed");
     }
 
@@ -90,6 +90,17 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
     if (order.paymentStatus === "PAID") {
         return order;
     }
+
+    // Save payment details
+    order.paymentDetails = {
+        bankTranId: validationResult.bankTranId,
+        cardType: validationResult.cardType,
+        cardBrand: validationResult.cardBrand,
+        cardIssuer: validationResult.cardIssuer,
+        amount: validationResult.amount,
+        paymentDate: validationResult.paymentDate,
+        valId: val_id,
+    };
 
     // Update payment status
     order.paymentStatus = "PAID";
