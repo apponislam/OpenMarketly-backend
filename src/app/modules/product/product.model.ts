@@ -10,7 +10,7 @@ const variantSchema = new Schema(
         stockQuantity: Number,
         image: String,
     },
-    { _id: false },
+    { _id: false }
 );
 
 const specificationSchema = new Schema(
@@ -18,7 +18,7 @@ const specificationSchema = new Schema(
         key: { type: String, required: true },
         value: { type: String, required: true },
     },
-    { _id: false },
+    { _id: false }
 );
 
 const productSchemaDefinition: any = {
@@ -154,10 +154,7 @@ const ProductSchema = new Schema<IProduct>(productSchemaDefinition, {
 ProductSchema.pre("save", function () {
     if (!this.slug && this.name) {
         const randomHex = Math.floor(1000 + Math.random() * 9000);
-        this.slug = `${this.name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)+/g, "")}-${randomHex}`;
+        this.slug = `${this.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")}-${randomHex}`;
     }
 
     if (!this.sku) {
