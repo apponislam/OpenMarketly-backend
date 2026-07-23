@@ -180,11 +180,29 @@ ProductSchema.pre("save", function () {
         this.price = Math.round(this.originalPrice - (this.originalPrice * this.discountPercentage) / 100);
     }
 
-    // Auto-calculate variant prices
+    // Auto-calculate variant prices and generate variant SKUs
     if (this.variants && this.variants.length > 0) {
         for (const variant of this.variants) {
+            // Price auto-calculation
             if (variant.originalPrice && variant.discountPercentage) {
                 variant.price = Math.round(variant.originalPrice - (variant.originalPrice * variant.discountPercentage) / 100);
+            }
+
+            // SKU auto-generation
+            if (!variant.sku) {
+                const parts = [this.sku];
+                if (variant.color) {
+                    parts.push(variant.color.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                }
+                if (variant.size) {
+                    parts.push(variant.size.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                }
+                // Fallback suffix if color & size are empty to keep SKU distinct
+                if (parts.length === 1) {
+                    const randomSuffix = Math.floor(100 + Math.random() * 900);
+                    parts.push(`VAR-${randomSuffix}`);
+                }
+                variant.sku = parts.join("-");
             }
         }
     }
