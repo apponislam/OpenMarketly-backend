@@ -22,7 +22,7 @@ const createCategory = async (data: Partial<ICategory>) => {
     return await CategoryModel.create(categoryData);
 };
 
-const getAllCategories = async (query: { search?: string; isActive?: string }) => {
+const getAllCategories = async (query: { search?: string; isActive?: string; page?: string; limit?: string }) => {
     const filter: any = { isDeleted: false };
 
     if (query.isActive !== undefined) {
@@ -35,7 +35,29 @@ const getAllCategories = async (query: { search?: string; isActive?: string }) =
         filter.name = { $regex: query.search, $options: "i" };
     }
 
-    return await CategoryModel.find(filter).populate("parentCategory", "name slug").sort({ createdAt: -1 });
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 10;
+    const skip = (page - 1) * limit;
+
+    const categories = await CategoryModel.find(filter)
+        .populate("parentCategory", "name slug")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await CategoryModel.countDocuments(filter);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: categories,
+    };
 };
 
 const getCategoryById = async (id: string) => {
@@ -85,10 +107,73 @@ const deleteCategory = async (id: string) => {
     return category;
 };
 
+const getParentCategories = async (page = 1, limit = 10) => {
+    const filter = {
+        isDeleted: false,
+        isActive: true,
+        $or: [
+            { parentCategory: { $exists: false } },
+            { parentCategory: null },
+        ],
+    };
+
+    const skip = (page - 1) * limit;
+
+    const categories = await CategoryModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await CategoryModel.countDocuments(filter);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: categories,
+    };
+};
+
+const getSubcategories = async (parentId: string, page = 1, limit = 10) => {
+    const filter = {
+        parentCategory: parentId,
+        isDeleted: false,
+        isActive: true,
+    };
+
+    const skip = (page - 1) * limit;
+
+    const categories = await CategoryModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await CategoryModel.countDocuments(filter);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: categories,
+    };
+};
+
 export const categoryServices = {
     createCategory,
     getAllCategories,
     getCategoryById,
     updateCategory,
     deleteCategory,
+    getParentCategories,
+    getSubcategories,
 };

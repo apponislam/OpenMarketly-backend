@@ -6,6 +6,8 @@ import { categoryControllers } from "./category.controllers";
 const router = Router();
 
 // Public routes
+router.get("/parents", categoryControllers.getParentCategories);
+router.get("/subcategories/:parentId", categoryControllers.getSubcategories);
 router.get("/", categoryControllers.getAllCategories);
 router.get("/:id", categoryControllers.getCategoryById);
 
