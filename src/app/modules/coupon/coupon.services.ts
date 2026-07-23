@@ -17,14 +17,33 @@ const createCoupon = async (data: Partial<ICoupon>) => {
     return await CouponModel.create(data);
 };
 
-const getAllCoupons = async (isAdmin = false) => {
+const getAllCoupons = async (isAdmin = false, page = 1, limit = 10) => {
     const filter: any = { isDeleted: false };
     if (!isAdmin) {
         filter.isActive = true;
         filter.expiryDate = { $gt: new Date() };
     }
 
-    return await CouponModel.find(filter).sort({ createdAt: -1 });
+    const skip = (page - 1) * limit;
+
+    const coupons = await CouponModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await CouponModel.countDocuments(filter);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: coupons,
+    };
 };
 
 const validateCoupon = async (code: string, orderAmount: number) => {

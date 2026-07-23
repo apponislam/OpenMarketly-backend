@@ -21,7 +21,7 @@ const orderItemSchema = new Schema<IOrderItem>(
             min: [0, "Price cannot be negative"],
         },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const shippingAddressSchema = new Schema<IShippingAddress>(
@@ -33,7 +33,7 @@ const shippingAddressSchema = new Schema<IShippingAddress>(
         country: { type: String, required: true },
         phone: { type: String, required: true },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const orderSchemaDefinition: any = {
@@ -95,7 +95,7 @@ const OrderSchema = new Schema<IOrder>(orderSchemaDefinition, {
 });
 
 OrderSchema.index({ user: 1, createdAt: -1 });
-OrderSchema.index({ transactionId: 1 }, { unique: true });
+// OrderSchema.index({ transactionId: 1 }, { unique: true });
 OrderSchema.index({ paymentStatus: 1 });
 OrderSchema.index({ orderStatus: 1 });
 

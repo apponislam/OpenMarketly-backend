@@ -62,7 +62,7 @@ CouponSchema.pre("save", function () {
     }
 });
 
-CouponSchema.index({ code: 1 }, { unique: true });
+// CouponSchema.index({ code: 1 }, { unique: true });
 CouponSchema.index({ isActive: 1, isDeleted: 1 });
 
 export const CouponModel = mongoose.model<ICoupon>("Coupon", CouponSchema);

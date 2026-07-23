@@ -119,23 +119,59 @@ const resolveDispute = async (disputeId: string, resolution: { status: "APPROVED
     return dispute;
 };
 
-const getAllDisputes = async () => {
-    return await DisputeModel.find()
+const getAllDisputes = async (page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const disputes = await DisputeModel.find()
         .populate("user", "name email phone profileImage")
         .populate({
             path: "order",
             populate: { path: "items.product", select: "name price thumbnail" },
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await DisputeModel.countDocuments();
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: disputes,
+    };
 };
 
-const getMyDisputes = async (userId: string) => {
-    return await DisputeModel.find({ user: userId })
+const getMyDisputes = async (userId: string, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit;
+
+    const disputes = await DisputeModel.find({ user: userId })
         .populate({
             path: "order",
             populate: { path: "items.product", select: "name price thumbnail" },
         })
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await DisputeModel.countDocuments({ user: userId });
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: disputes,
+    };
 };
 
 export const disputeServices = {

@@ -17,13 +17,16 @@ const createCoupon = catchAsync(async (req: Request, res: Response) => {
 
 const getAllCoupons = catchAsync(async (req: Request, res: Response) => {
     const isAdmin = req.user?.role === "ADMIN";
-    const result = await couponServices.getAllCoupons(isAdmin);
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const result = await couponServices.getAllCoupons(isAdmin, page, limit);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Coupons retrieved successfully",
-        data: result,
+        data: result.data,
+        meta: result.meta,
     });
 });
 

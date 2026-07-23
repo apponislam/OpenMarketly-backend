@@ -35,7 +35,7 @@ const createReport = async (userId: string, data: Partial<IReport>) => {
     return await ReportModel.create(reportData);
 };
 
-const getAllReports = async (type?: string, status?: string) => {
+const getAllReports = async (type?: string, status?: string, page = 1, limit = 10) => {
     const filter: any = { isDeleted: false };
     if (type) {
         filter.type = type.toUpperCase();
@@ -44,11 +44,29 @@ const getAllReports = async (type?: string, status?: string) => {
         filter.status = status.toUpperCase();
     }
 
-    return await ReportModel.find(filter)
+    const skip = (page - 1) * limit;
+
+    const reports = await ReportModel.find(filter)
         .populate("reporter", "name email profileImage")
         .populate("reportedProduct", "name sku thumbnail price")
         .populate("reportedUser", "name email profileImage role")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await ReportModel.countDocuments(filter);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: reports,
+    };
 };
 
 const getReportById = async (id: string, userId: string, userRole: string) => {

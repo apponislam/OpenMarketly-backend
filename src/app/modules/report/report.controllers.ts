@@ -18,13 +18,16 @@ const createReport = catchAsync(async (req: Request, res: Response) => {
 
 const getAllReports = catchAsync(async (req: Request, res: Response) => {
     const { type, status } = req.query;
-    const result = await reportServices.getAllReports(type as string, status as string);
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+    const result = await reportServices.getAllReports(type as string, status as string, page, limit);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
         message: "Report tickets retrieved successfully",
-        data: result,
+        data: result.data,
+        meta: result.meta,
     });
 });
 

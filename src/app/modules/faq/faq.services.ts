@@ -38,7 +38,10 @@ const createFaq = async (data: Partial<IFaq>) => {
     return await FaqModel.create(data);
 };
 
-const getAllFaqs = async (isAdmin: boolean, query: { category?: string }) => {
+const getAllFaqs = async (
+    isAdmin: boolean,
+    query: { category?: string; page?: string; limit?: string }
+) => {
     const filter: any = { isDeleted: false };
     if (!isAdmin) {
         filter.isPublished = true;
@@ -47,13 +50,44 @@ const getAllFaqs = async (isAdmin: boolean, query: { category?: string }) => {
         filter.category = query.category;
     }
 
-    const faqs = await FaqModel.find(filter).sort({ orderIndex: 1, createdAt: -1 });
+    const page = query.page ? Number(query.page) : 1;
+    const limit = query.limit ? Number(query.limit) : 10;
+    const skip = (page - 1) * limit;
+
+    const faqs = await FaqModel.find(filter)
+        .sort({ orderIndex: 1, createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    const total = await FaqModel.countDocuments(filter);
 
     if (faqs.length === 0 && !query.category && !isAdmin) {
-        return DEFAULT_FAQS;
+        const staticFaqs = DEFAULT_FAQS;
+        const slicedStatic = staticFaqs.slice(skip, skip + limit);
+        return {
+            meta: {
+                page,
+                limit,
+                total: staticFaqs.length,
+                totalPages: Math.ceil(staticFaqs.length / limit),
+                hasNext: page * limit < staticFaqs.length,
+                hasPrev: page > 1,
+            },
+            data: slicedStatic,
+        };
     }
 
-    return faqs;
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: faqs,
+    };
 };
 
 const updateFaq = async (id: string, data: Partial<IFaq>) => {
