@@ -6,6 +6,7 @@ import { CategoryModel } from "../category/category.model";
 import { WishlistModel } from "../wishlist/wishlist.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
+import { settingsServices } from "../settings/settings.services";
 
 export interface IProductQuery {
     search?: string;
@@ -18,6 +19,7 @@ export interface IProductQuery {
     isFeatured?: string;
     isTodayDeal?: string;
     isTrending?: string;
+    isApproved?: string;
     sellerId?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -36,9 +38,14 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
 
+    // Fetch site settings to check autoApproveProducts
+    const settings = await settingsServices.getSettings();
+    const isApproved = settings.autoApproveProducts !== false;
+
     const productData = {
         ...data,
         seller: sellerId,
+        isApproved,
     };
 
     const product = await ProductModel.create(productData);
@@ -56,8 +63,16 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
     ]);
 };
 
-const getAllProducts = async (query: IProductQuery, userId?: string) => {
+const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: string) => {
     const filter: any = { isDeleted: false, isActive: true };
+
+    if (userRole && ["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
+        if (query.isApproved !== undefined) {
+            filter.isApproved = query.isApproved === "true";
+        }
+    } else {
+        filter.isApproved = true;
+    }
 
     if (query.search) {
         filter.$or = [
@@ -177,13 +192,18 @@ const getAllProducts = async (query: IProductQuery, userId?: string) => {
     };
 };
 
-const getProductById = async (id: string, userId?: string) => {
+const getProductById = async (id: string, userId?: string, userRole?: string) => {
     const product = await ProductModel.findOne({ _id: id, isDeleted: false })
         .populate("category", "name slug description")
         .populate("seller", "name email phone profileImage");
 
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    }
+
+    // If product is not approved, only the seller, admin or super admin can view it
+    if (!product.isApproved && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
+        throw new ApiError(httpStatus.FORBIDDEN, "Product is pending approval");
     }
 
     const productObj = product.toObject() as any;
@@ -197,13 +217,18 @@ const getProductById = async (id: string, userId?: string) => {
     return productObj;
 };
 
-const getProductBySlug = async (slug: string, userId?: string) => {
+const getProductBySlug = async (slug: string, userId?: string, userRole?: string) => {
     const product = await ProductModel.findOne({ slug, isDeleted: false })
         .populate("category", "name slug description")
         .populate("seller", "name email phone profileImage");
 
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    }
+
+    // If product is not approved, only the seller, admin or super admin can view it
+    if (!product.isApproved && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
+        throw new ApiError(httpStatus.FORBIDDEN, "Product is pending approval");
     }
 
     const productObj = product.toObject() as any;
@@ -290,6 +315,31 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
     return deletedProduct;
 };
 
+const approveProduct = async (id: string, isApproved: boolean, adminId: string) => {
+    const product = await ProductModel.findOne({ _id: id, isDeleted: false });
+    if (!product) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
+    }
+
+    const updatedProduct = await ProductModel.findOneAndUpdate(
+        { _id: id, isDeleted: false },
+        { $set: { isApproved } },
+        { new: true }
+    )
+        .populate("category", "name slug")
+        .populate("seller", "name email profileImage");
+
+    if (updatedProduct) {
+        activityServices.logActivity(
+            adminId,
+            ActivityType.PRODUCT_UPDATE,
+            `${isApproved ? "Approved" : "Rejected"} product: ${updatedProduct.name}`
+        );
+    }
+
+    return updatedProduct;
+};
+
 export const productServices = {
     createProduct,
     getAllProducts,
@@ -298,4 +348,5 @@ export const productServices = {
     getMyProducts,
     updateProduct,
     deleteProduct,
+    approveProduct,
 };

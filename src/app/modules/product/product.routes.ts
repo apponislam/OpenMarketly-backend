@@ -16,5 +16,6 @@ router.get("/my/products", auth, authorize(["SUPER_ADMIN", "ADMIN", "SELLER"]), 
 router.post("/", auth, authorize(["SUPER_ADMIN", "ADMIN", "SELLER"]), productControllers.createProduct);
 router.patch("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN", "SELLER"]), productControllers.updateProduct);
 router.delete("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN", "SELLER"]), productControllers.deleteProduct);
+router.patch("/:id/approve", auth, authorize(["SUPER_ADMIN", "ADMIN"]), productControllers.approveProduct);
 
 export const productRoutes = router;

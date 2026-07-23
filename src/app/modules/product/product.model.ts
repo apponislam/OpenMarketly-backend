@@ -149,6 +149,10 @@ const productSchemaDefinition: any = {
         type: Boolean,
         default: true,
     },
+    isApproved: {
+        type: Boolean,
+        default: true,
+    },
     isDeleted: {
         type: Boolean,
         default: false,
@@ -218,5 +222,6 @@ ProductSchema.index({ isFeatured: 1, isDeleted: 1 });
 ProductSchema.index({ isTodayDeal: 1, isDeleted: 1 });
 ProductSchema.index({ isTrending: 1, isDeleted: 1 });
 ProductSchema.index({ isActive: 1, isDeleted: 1 });
+ProductSchema.index({ isApproved: 1, isDeleted: 1 });
 
 export const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);

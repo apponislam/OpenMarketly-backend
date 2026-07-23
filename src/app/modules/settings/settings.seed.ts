@@ -20,6 +20,7 @@ const seedSettings = async () => {
                 maintenanceMessage: "We are currently under maintenance. Please check back later.",
                 allowGuestCheckout: false,
                 allowSellerRegistration: true,
+                autoApproveProducts: true,
                 sellerCommissionRate: 10,
             });
             console.log("🟢 Site Settings successfully seeded.");

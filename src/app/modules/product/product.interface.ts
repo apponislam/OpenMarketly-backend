@@ -53,6 +53,7 @@ export interface IProduct {
     isTodayDeal?: boolean;
     isTrending?: boolean;
     isActive?: boolean;
+    isApproved?: boolean;
     isDeleted?: boolean;
     createdAt?: Date;
     updatedAt?: Date;

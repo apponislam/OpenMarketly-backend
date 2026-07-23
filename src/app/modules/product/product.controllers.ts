@@ -28,6 +28,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
         isFeatured: req.query.isFeatured as string | undefined,
         isTodayDeal: req.query.isTodayDeal as string | undefined,
         isTrending: req.query.isTrending as string | undefined,
+        isApproved: req.query.isApproved as string | undefined,
         sellerId: req.query.sellerId as string | undefined,
         sortBy: req.query.sortBy as string | undefined,
         sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
@@ -35,7 +36,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
         limit: req.query.limit ? Number(req.query.limit) : undefined,
     };
 
-    const result = await productServices.getAllProducts(query, req.user?._id as string | undefined);
+    const result = await productServices.getAllProducts(query, req.user?._id as string | undefined, req.user?.role as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -48,7 +49,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
 
 const getProductById = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await productServices.getProductById(id as string, req.user?._id as string | undefined);
+    const result = await productServices.getProductById(id as string, req.user?._id as string | undefined, req.user?.role as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -60,7 +61,7 @@ const getProductById = catchAsync(async (req: Request, res: Response) => {
 
 const getProductBySlug = catchAsync(async (req: Request, res: Response) => {
     const { slug } = req.params;
-    const result = await productServices.getProductBySlug(slug as string, req.user?._id as string | undefined);
+    const result = await productServices.getProductBySlug(slug as string, req.user?._id as string | undefined, req.user?.role as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -112,6 +113,21 @@ const deleteProduct = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const approveProduct = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { isApproved } = req.body;
+    const adminId = req.user._id;
+
+    const result = await productServices.approveProduct(id as string, isApproved, adminId);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: `Product ${isApproved ? "approved" : "rejected"} successfully`,
+        data: result,
+    });
+});
+
 export const productControllers = {
     createProduct,
     getAllProducts,
@@ -120,4 +136,5 @@ export const productControllers = {
     getMyProducts,
     updateProduct,
     deleteProduct,
+    approveProduct,
 };
