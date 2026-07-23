@@ -28,7 +28,7 @@ const getPolicyByType = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllPolicies = catchAsync(async (req: Request, res: Response) => {
-    const isAdmin = req.user?.role === "ADMIN";
+    const isAdmin = req.user?.role && ["SUPER_ADMIN", "ADMIN"].includes(req.user.role);
     const result = await policyServices.getAllPolicies(isAdmin);
 
     sendResponse(res, {

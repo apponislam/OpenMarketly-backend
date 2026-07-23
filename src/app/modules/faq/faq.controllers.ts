@@ -16,7 +16,7 @@ const createFaq = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllFaqs = catchAsync(async (req: Request, res: Response) => {
-    const isAdmin = req.user?.role === "ADMIN";
+    const isAdmin = req.user?.role && ["SUPER_ADMIN", "ADMIN"].includes(req.user.role);
     const result = await faqServices.getAllFaqs(isAdmin, req.query);
 
     sendResponse(res, {

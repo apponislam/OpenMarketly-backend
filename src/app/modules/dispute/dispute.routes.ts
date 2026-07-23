@@ -10,7 +10,7 @@ router.post("/", auth, disputeControllers.raiseDispute);
 router.get("/my", auth, disputeControllers.getMyDisputes);
 
 // Admin endpoints
-router.get("/", auth, authorize(["ADMIN"]), disputeControllers.getAllDisputes);
-router.patch("/resolve/:id", auth, authorize(["ADMIN"]), disputeControllers.resolveDispute);
+router.get("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), disputeControllers.getAllDisputes);
+router.patch("/resolve/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), disputeControllers.resolveDispute);
 
 export const disputeRoutes = router;

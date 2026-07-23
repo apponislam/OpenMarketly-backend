@@ -16,7 +16,7 @@ const createCoupon = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllCoupons = catchAsync(async (req: Request, res: Response) => {
-    const isAdmin = req.user?.role === "ADMIN";
+    const isAdmin = req.user?.role && ["SUPER_ADMIN", "ADMIN"].includes(req.user.role);
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const result = await couponServices.getAllCoupons(isAdmin, page, limit);

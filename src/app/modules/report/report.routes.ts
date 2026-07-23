@@ -12,7 +12,7 @@ router.post("/", auth, reportControllers.createReport);
 router.get("/:id", auth, reportControllers.getReportById);
 
 // Admin controls
-router.get("/", auth, authorize(["ADMIN"]), reportControllers.getAllReports);
-router.patch("/resolve/:id", auth, authorize(["ADMIN"]), reportControllers.resolveReport);
+router.get("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), reportControllers.getAllReports);
+router.patch("/resolve/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), reportControllers.resolveReport);
 
 export const reportRoutes = router;

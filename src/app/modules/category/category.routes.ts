@@ -12,8 +12,8 @@ router.get("/", categoryControllers.getAllCategories);
 router.get("/:id", categoryControllers.getCategoryById);
 
 // Admin protected routes
-router.post("/", auth, authorize(["ADMIN"]), categoryControllers.createCategory);
-router.patch("/:id", auth, authorize(["ADMIN"]), categoryControllers.updateCategory);
-router.delete("/:id", auth, authorize(["ADMIN"]), categoryControllers.deleteCategory);
+router.post("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), categoryControllers.createCategory);
+router.patch("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), categoryControllers.updateCategory);
+router.delete("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), categoryControllers.deleteCategory);
 
 export const categoryRoutes = router;

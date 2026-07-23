@@ -32,8 +32,12 @@ const registerUser = async (data: any) => {
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     const verificationExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // Delete referralCode from input so it's not saved directly; pre-save hook generates new user's own referralCode
+    // Filter fields to protect database integrity
     delete data.referralCode;
+    delete data.balance;
+    if (data.role && ["ADMIN", "SUPER_ADMIN"].includes(data.role.toUpperCase())) {
+        data.role = "CUSTOMER";
+    }
 
     // Create user
     const userData = {
@@ -279,6 +283,10 @@ const resetPassword = async (token: string, newPassword: string) => {
 };
 
 const updateProfile = async (userId: string, data: any) => {
+    // Delete balance and role fields to prevent unauthorized user updates
+    delete data.balance;
+    delete data.role;
+
     const user = await UserModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { $set: data }, { returnDocument: "after", runValidators: true }).select("-password");
 
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");

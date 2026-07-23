@@ -7,6 +7,7 @@ import { CouponModel } from "../coupon/coupon.model";
 import { couponServices } from "../coupon/coupon.services";
 import { IShippingAddress } from "./order.interface";
 import { initiateSSLCommerzPayment, validateSSLCommerzPayment } from "./sslcommerz.utils";
+import { UserModel } from "../auth/auth.model";
 
 const checkoutOrder = async (
     userId: string,
@@ -132,11 +133,22 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
         );
     }
 
-    // Deduct stock levels for purchased products
+    // Deduct stock levels and credit seller balances
     for (const item of order.items) {
-        await ProductModel.findByIdAndUpdate(item.product, {
-            $inc: { stockQuantity: -item.quantity },
-        });
+        const product = await ProductModel.findById(item.product);
+        if (product) {
+            // Deduct stock (ensure stock doesn't go below 0)
+            product.stockQuantity = Math.max(0, product.stockQuantity - item.quantity);
+            await product.save();
+
+            // Credit seller balance if the product has a seller reference
+            if (product.seller) {
+                const earnings = item.price * item.quantity;
+                await UserModel.findByIdAndUpdate(product.seller, {
+                    $inc: { balance: earnings },
+                });
+            }
+        }
     }
 
     // Clear user's active shopping cart
@@ -189,7 +201,7 @@ const getOrderById = async (orderId: string, userId: string, userRole: string) =
     }
 
     // Authorization check
-    if (order.user.toString() !== userId && userRole !== "ADMIN") {
+    if (order.user.toString() !== userId && !["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this order details");
     }
 

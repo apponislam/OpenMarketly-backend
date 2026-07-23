@@ -163,7 +163,7 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
     }
 
     // Permission check: only seller or admin can update product
-    if (existing.seller.toString() !== sellerId && userRole !== "ADMIN") {
+    if (existing.seller.toString() !== sellerId && !["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to update this product");
     }
 
@@ -192,7 +192,7 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
     }
 
     // Permission check: only seller or admin can delete product
-    if (existing.seller.toString() !== sellerId && userRole !== "ADMIN") {
+    if (existing.seller.toString() !== sellerId && !["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to delete this product");
     }
 

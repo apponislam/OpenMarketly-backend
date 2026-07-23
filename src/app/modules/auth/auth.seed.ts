@@ -5,7 +5,7 @@ import config from "../../config";
 export const seedAdmin = async () => {
     try {
         const adminExists = await UserModel.findOne({
-            role: "ADMIN",
+            role: { $in: ["SUPER_ADMIN", "ADMIN"] },
         });
 
         if (!adminExists) {
@@ -17,7 +17,7 @@ export const seedAdmin = async () => {
                 name: "Appon Islam",
                 email: config.superAdminEmail,
                 password: hashedPassword,
-                role: "ADMIN",
+                role: "SUPER_ADMIN",
                 phone: "01722779803",
                 isActive: true,
                 isEmailVerified: true,
@@ -25,7 +25,7 @@ export const seedAdmin = async () => {
 
             await UserModel.create(admin as any);
 
-            console.log("✅ Admin created:", config.superAdminEmail);
+            console.log("✅ Super Admin created:", config.superAdminEmail);
         } else {
             console.log("✅ Admin already exists, skipping creation");
         }

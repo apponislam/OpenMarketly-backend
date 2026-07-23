@@ -18,7 +18,7 @@ const createFeedback = catchAsync(async (req: Request, res: Response) => {
 
 const getAllFeedbacks = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user._id;
-    const isAdmin = req.user?.role === "ADMIN";
+    const isAdmin = req.user?.role && ["SUPER_ADMIN", "ADMIN"].includes(req.user.role);
 
     const result = await feedbackServices.getAllFeedbacks(userId.toString(), isAdmin, req.query);
 
@@ -47,7 +47,7 @@ const updateFeedbackStatus = catchAsync(async (req: Request, res: Response) => {
 
 const deleteFeedback = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user._id;
-    const isAdmin = req.user.role === "ADMIN";
+    const isAdmin = req.user?.role && ["SUPER_ADMIN", "ADMIN"].includes(req.user.role);
     const { id } = req.params;
 
     const result = await feedbackServices.deleteFeedback(userId.toString(), isAdmin, id as string);

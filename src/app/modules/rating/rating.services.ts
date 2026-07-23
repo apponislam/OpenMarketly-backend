@@ -106,7 +106,7 @@ const deleteRating = async (id: string, userId: string, userRole: string) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Rating not found");
     }
 
-    if (rating.user.toString() !== userId && userRole !== "ADMIN") {
+    if (rating.user.toString() !== userId && !["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to delete this rating");
     }
 

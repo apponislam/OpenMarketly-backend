@@ -24,9 +24,14 @@ const userSchemaDefinition: any = {
 
     role: {
         type: String,
-        enum: ["ADMIN", "USER"],
-        default: "USER",
+        enum: ["SUPER_ADMIN", "ADMIN", "SELLER", "CUSTOMER"],
+        default: "CUSTOMER",
         required: true,
+    },
+
+    balance: {
+        type: Number,
+        default: 0,
     },
 
     gender: {

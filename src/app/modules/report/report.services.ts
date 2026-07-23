@@ -80,7 +80,7 @@ const getReportById = async (id: string, userId: string, userRole: string) => {
     }
 
     // Auth check: Admin or original reporter can view details
-    if (report.reporter._id.toString() !== userId && userRole !== "ADMIN") {
+    if (report.reporter._id.toString() !== userId && !["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to view this report");
     }
 

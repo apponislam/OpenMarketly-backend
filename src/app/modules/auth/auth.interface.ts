@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export type UserRole = "ADMIN" | "USER";
+export type UserRole = "SUPER_ADMIN" | "ADMIN" | "SELLER" | "CUSTOMER";
 
 export enum Gender {
     MALE = "MALE",
@@ -13,6 +13,7 @@ export interface User {
     email: string;
     password: string;
     role: UserRole;
+    balance?: number;
     gender?: Gender;
     phone?: string;
     profileImage?: string;

@@ -10,7 +10,7 @@ router.get("/", policyControllers.getAllPolicies);
 router.get("/:type", policyControllers.getPolicyByType);
 
 // Admin protected routes
-router.post("/", auth, authorize(["ADMIN"]), policyControllers.createOrUpdatePolicy);
-router.delete("/:type", auth, authorize(["ADMIN"]), policyControllers.deletePolicy);
+router.post("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), policyControllers.createOrUpdatePolicy);
+router.delete("/:type", auth, authorize(["SUPER_ADMIN", "ADMIN"]), policyControllers.deletePolicy);
 
 export const policyRoutes = router;

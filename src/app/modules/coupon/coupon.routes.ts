@@ -12,8 +12,8 @@ router.get("/validate", auth, couponControllers.validateCoupon);
 router.get("/", auth, couponControllers.getAllCoupons);
 
 // Admin controls
-router.post("/", auth, authorize(["ADMIN"]), couponControllers.createCoupon);
-router.patch("/:id", auth, authorize(["ADMIN"]), couponControllers.updateCoupon);
-router.delete("/:id", auth, authorize(["ADMIN"]), couponControllers.deleteCoupon);
+router.post("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), couponControllers.createCoupon);
+router.patch("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), couponControllers.updateCoupon);
+router.delete("/:id", auth, authorize(["SUPER_ADMIN", "ADMIN"]), couponControllers.deleteCoupon);
 
 export const couponRoutes = router;

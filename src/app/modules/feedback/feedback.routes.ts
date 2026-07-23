@@ -12,7 +12,7 @@ router.post("/", auth, feedbackControllers.createFeedback);
 router.get("/", auth, feedbackControllers.getAllFeedbacks);
 
 // Admin status update & admin note
-router.patch("/:id/status", auth, authorize(["ADMIN"]), feedbackControllers.updateFeedbackStatus);
+router.patch("/:id/status", auth, authorize(["SUPER_ADMIN", "ADMIN"]), feedbackControllers.updateFeedbackStatus);
 
 // Soft delete feedback
 router.delete("/:id", auth, feedbackControllers.deleteFeedback);
