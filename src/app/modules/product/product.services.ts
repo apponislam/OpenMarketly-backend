@@ -118,7 +118,9 @@ const getAllProducts = async (query: IProductQuery) => {
             page,
             limit,
             total,
-            totalPage: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
         },
         data: products,
     };

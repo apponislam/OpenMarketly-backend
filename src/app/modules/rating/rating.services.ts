@@ -54,7 +54,9 @@ const getProductRatings = async (productId: string, page = 1, limit = 10) => {
             page,
             limit,
             total,
-            totalPage: Math.ceil(total / limit),
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
         },
         data: ratings,
     };
