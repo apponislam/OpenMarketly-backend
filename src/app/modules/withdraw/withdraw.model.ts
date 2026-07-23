@@ -32,6 +32,10 @@ const withdrawSchemaDefinition: any = {
         enum: ["PENDING", "APPROVED", "REJECTED"],
         default: "PENDING",
     },
+    transactionId: {
+        type: String,
+        trim: true,
+    },
     adminNote: {
         type: String,
         trim: true,

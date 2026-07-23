@@ -5,6 +5,7 @@ import { IWithdraw } from "./withdraw.interface";
 import { WithdrawModel } from "./withdraw.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
+import { initiateSSLCommerzPayout } from "../order/sslcommerz.utils";
 
 const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>) => {
     if (!data.amount || !data.paymentMethod || !data.paymentDetails?.accountNumber) {
@@ -23,26 +24,60 @@ const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>)
         throw new ApiError(httpStatus.BAD_REQUEST, "Insufficient balance for this withdrawal request");
     }
 
-    // Deduct/hold balance from seller's active balance
+    // Hold balance from seller's active balance
     seller.balance = currentBalance - data.amount;
     await seller.save();
 
-    const withdrawRequest = await WithdrawModel.create({
-        seller: sellerId,
-        amount: data.amount,
-        paymentMethod: data.paymentMethod,
-        paymentDetails: data.paymentDetails,
-        status: "PENDING",
-    });
+    // Generate a unique transaction ID for SSLCommerz payout
+    const payoutTxnId = `PO-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    // Log activity
-    activityServices.logActivity(
-        sellerId,
-        ActivityType.ORDER_PLACE, // generic billing activity
-        `Requested a withdrawal of ${data.amount} BDT via ${data.paymentMethod}`
-    );
+    try {
+        const payoutResponse = await initiateSSLCommerzPayout({
+            amount: data.amount,
+            tran_id: payoutTxnId,
+            payment_mode: data.paymentMethod,
+            receiver_name: seller.name,
+            receiver_account: data.paymentDetails.accountNumber,
+            bank_name: data.paymentDetails.bankName,
+            branch_name: data.paymentDetails.branchName,
+            routing_number: data.paymentDetails.routingNumber,
+        });
 
-    return withdrawRequest;
+        if (payoutResponse.success) {
+            // Save as APPROVED since the payment was processed successfully
+            const withdrawRequest = await WithdrawModel.create({
+                seller: sellerId,
+                amount: data.amount,
+                paymentMethod: data.paymentMethod,
+                paymentDetails: data.paymentDetails,
+                status: "APPROVED",
+                transactionId: payoutResponse.payoutRefId || payoutTxnId,
+                adminNote: payoutResponse.message || "Auto-disbursed via SSLCommerz",
+            });
+
+            // Log activity
+            activityServices.logActivity(
+                sellerId,
+                ActivityType.ORDER_PLACE, // generic billing activity
+                `Completed automatic withdrawal of ${data.amount} BDT via ${data.paymentMethod}`
+            );
+
+            return withdrawRequest;
+        } else {
+            // Refund balance immediately if payout failed
+            seller.balance = currentBalance;
+            await seller.save();
+
+            throw new ApiError(httpStatus.BAD_GATEWAY, `Automatic payout failed: ${payoutResponse.message}`);
+        }
+    } catch (error: any) {
+        // Refund balance immediately if connection or validation error
+        seller.balance = currentBalance;
+        await seller.save();
+
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(httpStatus.BAD_GATEWAY, `Automatic payout failed: ${error.message || "Unknown error"}`);
+    }
 };
 
 const resolveWithdrawRequest = async (

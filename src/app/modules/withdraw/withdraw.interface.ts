@@ -15,6 +15,7 @@ export interface IWithdraw {
         routingNumber?: string;
     };
     status: WithdrawStatus;
+    transactionId?: string;
     adminNote?: string;
     createdAt?: Date;
     updatedAt?: Date;

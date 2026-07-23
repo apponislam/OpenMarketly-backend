@@ -187,3 +187,78 @@ export const refundSSLCommerzPayment = async (
         };
     }
 };
+
+export interface ISSLCommerzPayoutPayload {
+    amount: number;
+    tran_id: string;
+    payment_mode: "BANK" | "BKASH" | "NAGAD" | "ROCKET";
+    receiver_name: string;
+    receiver_account: string; // Phone number for MFS, account number for Bank
+    bank_name?: string;
+    branch_name?: string;
+    routing_number?: string;
+}
+
+export interface ISSLCommerzPayoutResponse {
+    success: boolean;
+    payoutRefId?: string;
+    message?: string;
+}
+
+export const initiateSSLCommerzPayout = async (payload: ISSLCommerzPayoutPayload): Promise<ISSLCommerzPayoutResponse> => {
+    const store_id = config.ssl.store_id;
+    const store_passwd = config.ssl.store_pass;
+    const isSandbox = config.ssl.is_sandbox;
+
+    if (!store_id || !store_passwd) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "SSLCommerz store configurations are missing");
+    }
+
+    const disburseUrl = isSandbox
+        ? "https://sandbox.sslcommerz.com/api/v1/disburse"
+        : "https://securepay.sslcommerz.com/api/v1/disburse";
+
+    const params = new URLSearchParams();
+    params.append("store_id", store_id);
+    params.append("store_passwd", store_passwd);
+    params.append("amount", payload.amount.toString());
+    params.append("currency", "BDT");
+    params.append("merchant_trans_id", payload.tran_id);
+    params.append("payment_mode", payload.payment_mode.toLowerCase());
+    params.append("beneficiary_name", payload.receiver_name || "Seller Withdrawal");
+    params.append("beneficiary_account", payload.receiver_account);
+    params.append("beneficiary_mobile", payload.receiver_account);
+
+    if (payload.payment_mode === "BANK") {
+        if (payload.bank_name) params.append("bank_name", payload.bank_name);
+        if (payload.branch_name) params.append("branch_name", payload.branch_name);
+        if (payload.routing_number) params.append("routing_number", payload.routing_number);
+    }
+
+    try {
+        const response = await axios.post(disburseUrl, params, {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+        });
+
+        const data = response.data;
+        if (data && (data.status === "success" || data.status === "SUCCESS")) {
+            return {
+                success: true,
+                payoutRefId: data.ref_id || data.tran_id,
+                message: data.message || "Payout requested successfully",
+            };
+        } else {
+            return {
+                success: false,
+                message: data.errorreason || data.failedreason || data.message || "Disbursement failed by gateway",
+            };
+        }
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.message || "SSLCommerz gateway connection error during payout",
+        };
+    }
+};
