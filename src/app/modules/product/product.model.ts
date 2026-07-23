@@ -131,16 +131,6 @@ const productSchemaDefinition: any = {
         type: [String],
         default: [],
     },
-    ratings: {
-        type: Number,
-        default: 0,
-        min: [0, "Ratings cannot be less than 0"],
-        max: [5, "Ratings cannot exceed 5"],
-    },
-    totalReviews: {
-        type: Number,
-        default: 0,
-    },
     isFeatured: {
         type: Boolean,
         default: false,

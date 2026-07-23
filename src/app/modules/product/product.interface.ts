@@ -47,8 +47,6 @@ export interface IProduct {
     returnPolicy?: string;
 
     tags?: string[];
-    ratings?: number;
-    totalReviews?: number;
     isFeatured?: boolean;
     isActive?: boolean;
     isDeleted?: boolean;
