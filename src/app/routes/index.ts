@@ -8,6 +8,7 @@ import { categoryRoutes } from "../modules/category/category.routes";
 import { productRoutes } from "../modules/product/product.routes";
 import { ratingRoutes } from "../modules/rating/rating.routes";
 import { favoriteRoutes } from "../modules/favorite/favorite.routes";
+import { policyRoutes } from "../modules/policy/policy.routes";
 
 const router = express.Router();
 
@@ -47,6 +48,10 @@ const moduleRoutes = [
     {
         path: "/favorites",
         route: favoriteRoutes,
+    },
+    {
+        path: "/policies",
+        route: policyRoutes,
     },
 ];
 
