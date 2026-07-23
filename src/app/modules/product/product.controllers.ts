@@ -33,7 +33,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
         limit: req.query.limit ? Number(req.query.limit) : undefined,
     };
 
-    const result = await productServices.getAllProducts(query);
+    const result = await productServices.getAllProducts(query, req.user?._id as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -46,7 +46,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
 
 const getProductById = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await productServices.getProductById(id as string);
+    const result = await productServices.getProductById(id as string, req.user?._id as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -58,7 +58,7 @@ const getProductById = catchAsync(async (req: Request, res: Response) => {
 
 const getProductBySlug = catchAsync(async (req: Request, res: Response) => {
     const { slug } = req.params;
-    const result = await productServices.getProductBySlug(slug as string);
+    const result = await productServices.getProductBySlug(slug as string, req.user?._id as string | undefined);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

@@ -1,14 +1,15 @@
 import { Router } from "express";
 import auth from "../../middlewares/auth";
 import authorize from "../../middlewares/authorized";
+import checkAuth from "../../middlewares/checkAuth";
 import { productControllers } from "./product.controllers";
 
 const router = Router();
 
 // Public routes
-router.get("/", productControllers.getAllProducts);
-router.get("/slug/:slug", productControllers.getProductBySlug);
-router.get("/:id", productControllers.getProductById);
+router.get("/", checkAuth, productControllers.getAllProducts);
+router.get("/slug/:slug", checkAuth, productControllers.getProductBySlug);
+router.get("/:id", checkAuth, productControllers.getProductById);
 
 // Protected routes (Seller / Authenticated users)
 router.get("/my/products", auth, authorize(["SUPER_ADMIN", "ADMIN", "SELLER"]), productControllers.getMyProducts);

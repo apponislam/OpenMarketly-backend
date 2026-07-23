@@ -3,6 +3,7 @@ import ApiError from "../../../errors/ApiError";
 import { IProduct } from "./product.interface";
 import { ProductModel } from "./product.model";
 import { CategoryModel } from "../category/category.model";
+import { WishlistModel } from "../wishlist/wishlist.model";
 
 export interface IProductQuery {
     search?: string;
@@ -43,7 +44,7 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
     ]);
 };
 
-const getAllProducts = async (query: IProductQuery) => {
+const getAllProducts = async (query: IProductQuery, userId?: string) => {
     const filter: any = { isDeleted: false, isActive: true };
 
     if (query.search) {
@@ -128,6 +129,21 @@ const getAllProducts = async (query: IProductQuery) => {
 
     const total = await ProductModel.countDocuments(filter);
 
+    let processedProducts = products.map((p) => p.toObject());
+    if (userId) {
+        const wishlistedItems = await WishlistModel.find({ user: userId }).select("product");
+        const wishlistedProductIds = new Set(wishlistedItems.map((item) => item.product.toString()));
+        processedProducts = processedProducts.map((p: any) => ({
+            ...p,
+            isWishlisted: wishlistedProductIds.has(p._id.toString()),
+        }));
+    } else {
+        processedProducts = processedProducts.map((p: any) => ({
+            ...p,
+            isWishlisted: false,
+        }));
+    }
+
     return {
         meta: {
             page,
@@ -137,11 +153,11 @@ const getAllProducts = async (query: IProductQuery) => {
             hasNext: page * limit < total,
             hasPrev: page > 1,
         },
-        data: products,
+        data: processedProducts,
     };
 };
 
-const getProductById = async (id: string) => {
+const getProductById = async (id: string, userId?: string) => {
     const product = await ProductModel.findOne({ _id: id, isDeleted: false })
         .populate("category", "name slug description")
         .populate("seller", "name email phone profileImage");
@@ -150,10 +166,18 @@ const getProductById = async (id: string) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }
 
-    return product;
+    const productObj = product.toObject() as any;
+    if (userId) {
+        const isWishlisted = await WishlistModel.findOne({ user: userId, product: id });
+        productObj.isWishlisted = !!isWishlisted;
+    } else {
+        productObj.isWishlisted = false;
+    }
+
+    return productObj;
 };
 
-const getProductBySlug = async (slug: string) => {
+const getProductBySlug = async (slug: string, userId?: string) => {
     const product = await ProductModel.findOne({ slug, isDeleted: false })
         .populate("category", "name slug description")
         .populate("seller", "name email phone profileImage");
@@ -162,7 +186,15 @@ const getProductBySlug = async (slug: string) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }
 
-    return product;
+    const productObj = product.toObject() as any;
+    if (userId) {
+        const isWishlisted = await WishlistModel.findOne({ user: userId, product: product._id });
+        productObj.isWishlisted = !!isWishlisted;
+    } else {
+        productObj.isWishlisted = false;
+    }
+
+    return productObj;
 };
 
 const getMyProducts = async (sellerId: string) => {
