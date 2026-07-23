@@ -70,6 +70,14 @@ const orderSchemaDefinition: any = {
         required: [true, "Transaction ID is required"],
         unique: true,
     },
+    couponCode: {
+        type: String,
+        uppercase: true,
+    },
+    discountAmount: {
+        type: Number,
+        default: 0,
+    },
     paymentDetails: {
         bankTranId: String,
         cardType: String,

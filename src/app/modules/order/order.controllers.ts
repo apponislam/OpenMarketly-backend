@@ -7,14 +7,14 @@ import { orderServices } from "./order.services";
 
 const checkoutOrder = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user._id;
-    const { shippingAddress } = req.body;
+    const { shippingAddress, couponCode } = req.body;
     const userContext = {
         name: req.user.name,
         email: req.user.email,
         phone: req.user.phone,
     };
 
-    const result = await orderServices.checkoutOrder(userId, shippingAddress, userContext);
+    const result = await orderServices.checkoutOrder(userId, shippingAddress, userContext, couponCode);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,

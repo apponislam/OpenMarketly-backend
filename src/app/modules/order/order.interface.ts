@@ -26,6 +26,8 @@ export interface IOrder {
     paymentStatus: "PENDING" | "PAID" | "FAILED" | "CANCELLED";
     orderStatus: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
     transactionId: string;
+    couponCode?: string;
+    discountAmount?: number;
     paymentDetails?: {
         bankTranId?: string;
         cardType?: string;

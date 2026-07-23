@@ -3,13 +3,16 @@ import ApiError from "../../../errors/ApiError";
 import { OrderModel } from "./order.model";
 import { CartModel } from "../cart/cart.model";
 import { ProductModel } from "../product/product.model";
+import { CouponModel } from "../coupon/coupon.model";
+import { couponServices } from "../coupon/coupon.services";
 import { IShippingAddress } from "./order.interface";
 import { initiateSSLCommerzPayment, validateSSLCommerzPayment } from "./sslcommerz.utils";
 
 const checkoutOrder = async (
     userId: string,
     shippingAddress: IShippingAddress,
-    userContext: { name: string; email: string; phone?: string }
+    userContext: { name: string; email: string; phone?: string },
+    couponCode?: string
 ) => {
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.zipCode || !shippingAddress.country || !shippingAddress.phone) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Complete shipping address is required");
@@ -34,6 +37,18 @@ const checkoutOrder = async (
         }
     }
 
+    // Process coupon code if provided
+    let finalPrice = cart.totalPrice;
+    let discountAmount = 0;
+    let appliedCouponCode = undefined;
+
+    if (couponCode) {
+        const couponValidation = await couponServices.validateCoupon(couponCode, cart.totalPrice);
+        finalPrice = couponValidation.finalAmount;
+        discountAmount = couponValidation.discountAmount;
+        appliedCouponCode = couponValidation.code;
+    }
+
     // Generate unique transaction ID
     const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
     const transactionId = `TXN-${Date.now()}-${randomSuffix}`;
@@ -50,8 +65,10 @@ const checkoutOrder = async (
     const order = await OrderModel.create({
         user: userId,
         items: orderItems,
-        totalPrice: cart.totalPrice,
+        totalPrice: finalPrice,
         shippingAddress,
+        couponCode: appliedCouponCode,
+        discountAmount,
         paymentStatus: "PENDING",
         orderStatus: "PENDING",
         transactionId,
@@ -59,7 +76,7 @@ const checkoutOrder = async (
 
     // Initiate payment via SSLCommerz
     const paymentUrl = await initiateSSLCommerzPayment({
-        total_amount: cart.totalPrice,
+        total_amount: finalPrice,
         tran_id: transactionId,
         cus_name: userContext.name,
         cus_email: userContext.email,
@@ -106,6 +123,14 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
     order.paymentStatus = "PAID";
     order.orderStatus = "PROCESSING";
     await order.save();
+
+    // Increment coupon usage count if used
+    if (order.couponCode) {
+        await CouponModel.findOneAndUpdate(
+            { code: order.couponCode },
+            { $inc: { usageCount: 1 } }
+        );
+    }
 
     // Deduct stock levels for purchased products
     for (const item of order.items) {
