@@ -16,7 +16,8 @@ const getSettings = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateSettings = catchAsync(async (req: Request, res: Response) => {
-    const result = await settingsServices.updateSettings(req.body);
+    const userId = req.user?._id;
+    const result = await settingsServices.updateSettings(req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

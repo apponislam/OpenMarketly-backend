@@ -5,7 +5,8 @@ import sendResponse from "../../../utils/sendResponse";
 import { faqServices } from "./faq.services";
 
 const createFaq = catchAsync(async (req: Request, res: Response) => {
-    const result = await faqServices.createFaq(req.body);
+    const userId = req.user?._id;
+    const result = await faqServices.createFaq(req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -30,7 +31,8 @@ const getAllFaqs = catchAsync(async (req: Request, res: Response) => {
 
 const updateFaq = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await faqServices.updateFaq(id as string, req.body);
+    const userId = req.user?._id;
+    const result = await faqServices.updateFaq(id as string, req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -42,7 +44,8 @@ const updateFaq = catchAsync(async (req: Request, res: Response) => {
 
 const deleteFaq = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await faqServices.deleteFaq(id as string);
+    const userId = req.user?._id;
+    const result = await faqServices.deleteFaq(id as string, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

@@ -18,7 +18,8 @@ const raiseDispute = catchAsync(async (req: Request, res: Response) => {
 
 const resolveDispute = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await disputeServices.resolveDispute(id as string, req.body);
+    const adminUserId = req.user._id;
+    const result = await disputeServices.resolveDispute(id as string, req.body, adminUserId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

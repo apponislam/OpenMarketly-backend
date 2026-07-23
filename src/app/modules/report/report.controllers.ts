@@ -48,7 +48,8 @@ const getReportById = catchAsync(async (req: Request, res: Response) => {
 
 const resolveReport = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await reportServices.resolveReport(id as string, req.body);
+    const adminUserId = req.user._id;
+    const result = await reportServices.resolveReport(id as string, req.body, adminUserId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

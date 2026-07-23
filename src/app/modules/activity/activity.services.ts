@@ -1,8 +1,20 @@
-import { IActivityLog } from "./activity.interface";
+import { IActivityLog, ActivityType } from "./activity.interface";
 import { ActivityLogModel } from "./activity.model";
 
-const logActivity = async (data: Partial<IActivityLog>) => {
-    return await ActivityLogModel.create(data);
+const logActivity = async (
+    userId: string,
+    action: ActivityType | string,
+    details?: string,
+    ipAddress?: string,
+    userAgent?: string
+) => {
+    return await ActivityLogModel.create({
+        user: userId,
+        action,
+        details,
+        ipAddress,
+        userAgent,
+    });
 };
 
 const getMyActivityLogs = async (userId: string, page: number = 1, limit: number = 10) => {

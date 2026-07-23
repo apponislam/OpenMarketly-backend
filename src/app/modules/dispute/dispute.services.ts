@@ -5,6 +5,8 @@ import { OrderModel } from "../order/order.model";
 import { IDispute, DisputeStatus, DisputeType } from "./dispute.interface";
 import { refundSSLCommerzPayment } from "../order/sslcommerz.utils";
 import mongoose from "mongoose";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const raiseDispute = async (userId: string, data: Partial<IDispute>) => {
     if (!data.order || !data.type || !data.reason || !data.description) {
@@ -36,10 +38,23 @@ const raiseDispute = async (userId: string, data: Partial<IDispute>) => {
         status: "PENDING" as DisputeStatus,
     };
 
-    return await DisputeModel.create(disputeData);
+    const dispute = await DisputeModel.create(disputeData);
+
+    // Log dispute raised
+    activityServices.logActivity(
+        userId,
+        ActivityType.DISPUTE_CREATE,
+        `Raised a dispute for order ${data.order} (Type: ${data.type})`
+    );
+
+    return dispute;
 };
 
-const resolveDispute = async (disputeId: string, resolution: { status: "APPROVED" | "REJECTED"; adminNote?: string }) => {
+const resolveDispute = async (
+    disputeId: string,
+    resolution: { status: "APPROVED" | "REJECTED"; adminNote?: string },
+    adminUserId: string
+) => {
     const { status, adminNote } = resolution;
 
     if (!status || !["APPROVED", "REJECTED"].includes(status)) {
@@ -64,6 +79,14 @@ const resolveDispute = async (disputeId: string, resolution: { status: "APPROVED
         dispute.status = "REJECTED";
         dispute.adminNote = adminNote || "Request rejected by admin";
         await dispute.save();
+
+        // Log dispute rejection
+        activityServices.logActivity(
+            adminUserId,
+            ActivityType.DISPUTE_RESOLVE,
+            `Rejected dispute: ${disputeId} with note: ${dispute.adminNote}`
+        );
+
         return dispute;
     }
 
@@ -116,6 +139,14 @@ const resolveDispute = async (disputeId: string, resolution: { status: "APPROVED
     }
 
     await dispute.save();
+
+    // Log dispute approval
+    activityServices.logActivity(
+        adminUserId,
+        ActivityType.DISPUTE_RESOLVE,
+        `Approved dispute: ${disputeId} (Status set to: ${dispute.status})`
+    );
+
     return dispute;
 };
 

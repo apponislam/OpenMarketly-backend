@@ -3,6 +3,8 @@ import ApiError from "../../../errors/ApiError";
 import { IReport, ReportStatus, ReportType } from "./report.interface";
 import { ReportModel } from "./report.model";
 import mongoose from "mongoose";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const createReport = async (userId: string, data: Partial<IReport>) => {
     if (!data.type || !data.reason || !data.description) {
@@ -32,7 +34,16 @@ const createReport = async (userId: string, data: Partial<IReport>) => {
         reportData.reportedUser = new mongoose.Types.ObjectId(data.reportedUser.toString());
     }
 
-    return await ReportModel.create(reportData);
+    const report = await ReportModel.create(reportData);
+
+    // Log report creation
+    activityServices.logActivity(
+        userId,
+        ActivityType.REPORT_CREATE,
+        `Submitted a report ticket against ${data.type} (Reason: ${data.reason})`
+    );
+
+    return report;
 };
 
 const getAllReports = async (type?: string, status?: string, page = 1, limit = 10) => {
@@ -87,7 +98,11 @@ const getReportById = async (id: string, userId: string, userRole: string) => {
     return report;
 };
 
-const resolveReport = async (id: string, resolution: { status: ReportStatus; adminNote?: string }) => {
+const resolveReport = async (
+    id: string,
+    resolution: { status: ReportStatus; adminNote?: string },
+    adminUserId: string
+) => {
     const { status, adminNote } = resolution;
 
     if (!status || !["UNDER_INVESTIGATION", "RESOLVED", "DISMISSED"].includes(status)) {
@@ -111,6 +126,13 @@ const resolveReport = async (id: string, resolution: { status: ReportStatus; adm
     if (!report) {
         throw new ApiError(httpStatus.NOT_FOUND, "Report ticket not found");
     }
+
+    // Log report resolution activity
+    activityServices.logActivity(
+        adminUserId,
+        ActivityType.REPORT_ACTION,
+        `Resolved report ticket ${id} (Status set to: ${status})`
+    );
 
     return report;
 };

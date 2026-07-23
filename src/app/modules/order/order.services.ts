@@ -6,8 +6,10 @@ import { ProductModel } from "../product/product.model";
 import { CouponModel } from "../coupon/coupon.model";
 import { couponServices } from "../coupon/coupon.services";
 import { IShippingAddress } from "./order.interface";
-import { initiateSSLCommerzPayment, validateSSLCommerzPayment } from "./sslcommerz.utils";
+import { validateSSLCommerzPayment, initiateSSLCommerzPayment } from "./sslcommerz.utils";
 import { UserModel } from "../auth/auth.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const checkoutOrder = async (
     userId: string,
@@ -74,6 +76,13 @@ const checkoutOrder = async (
         orderStatus: "PENDING",
         transactionId,
     });
+
+    // Log order placement
+    activityServices.logActivity(
+        userId,
+        ActivityType.ORDER_PLACE,
+        `Placed order with transaction ID ${transactionId} (Total: ${finalPrice} BDT)`
+    );
 
     // Initiate payment via SSLCommerz
     const paymentUrl = await initiateSSLCommerzPayment({
@@ -154,6 +163,13 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
     // Clear user's active shopping cart
     await CartModel.findOneAndUpdate({ user: order.user }, { $set: { items: [], totalPrice: 0 } });
 
+    // Log payment success
+    activityServices.logActivity(
+        order.user.toString(),
+        ActivityType.PAYMENT_SUCCESS,
+        `Payment succeeded for transaction ID: ${tran_id}`
+    );
+
     return order;
 };
 
@@ -166,6 +182,14 @@ const handlePaymentFail = async (tran_id: string) => {
     if (!order) {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }
+
+    // Log payment failure
+    activityServices.logActivity(
+        order.user.toString(),
+        ActivityType.PAYMENT_FAIL,
+        `Payment failed for transaction ID: ${tran_id}`
+    );
+
     return order;
 };
 
@@ -178,6 +202,14 @@ const handlePaymentCancel = async (tran_id: string) => {
     if (!order) {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }
+
+    // Log payment cancellation
+    activityServices.logActivity(
+        order.user.toString(),
+        ActivityType.PAYMENT_FAIL,
+        `Payment cancelled for transaction ID: ${tran_id}`
+    );
+
     return order;
 };
 

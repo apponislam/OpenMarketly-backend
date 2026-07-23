@@ -5,7 +5,8 @@ import sendResponse from "../../../utils/sendResponse";
 import { policyServices } from "./policy.services";
 
 const createOrUpdatePolicy = catchAsync(async (req: Request, res: Response) => {
-    const result = await policyServices.createOrUpdatePolicy(req.body);
+    const userId = req.user?._id;
+    const result = await policyServices.createOrUpdatePolicy(req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -41,7 +42,8 @@ const getAllPolicies = catchAsync(async (req: Request, res: Response) => {
 
 const deletePolicy = catchAsync(async (req: Request, res: Response) => {
     const { type } = req.params;
-    const result = await policyServices.deletePolicy(type as string);
+    const userId = req.user?._id;
+    const result = await policyServices.deletePolicy(type as string, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

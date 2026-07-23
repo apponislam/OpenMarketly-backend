@@ -2,8 +2,10 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import { ICoupon } from "./coupon.interface";
 import { CouponModel } from "./coupon.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
-const createCoupon = async (data: Partial<ICoupon>) => {
+const createCoupon = async (data: Partial<ICoupon>, userId: string) => {
     if (!data.code || !data.discountType || data.discountValue === undefined || !data.expiryDate) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Code, discountType, discountValue, and expiryDate are required");
     }
@@ -14,7 +16,16 @@ const createCoupon = async (data: Partial<ICoupon>) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Coupon code already exists");
     }
 
-    return await CouponModel.create(data);
+    const coupon = await CouponModel.create(data);
+
+    // Log coupon creation
+    activityServices.logActivity(
+        userId,
+        ActivityType.COUPON_CREATE,
+        `Created coupon: ${coupon.code}`
+    );
+
+    return coupon;
 };
 
 const getAllCoupons = async (isAdmin = false, page = 1, limit = 10) => {
@@ -104,7 +115,7 @@ const validateCoupon = async (code: string, orderAmount: number) => {
     };
 };
 
-const updateCoupon = async (id: string, data: Partial<ICoupon>) => {
+const updateCoupon = async (id: string, data: Partial<ICoupon>, userId: string) => {
     if (data.code) {
         const uppercaseCode = data.code.toUpperCase().trim();
         const existing = await CouponModel.findOne({ code: uppercaseCode, _id: { $ne: id }, isDeleted: false });
@@ -123,10 +134,17 @@ const updateCoupon = async (id: string, data: Partial<ICoupon>) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Coupon not found");
     }
 
+    // Log coupon update activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.COUPON_UPDATE,
+        `Updated coupon: ${coupon.code}`
+    );
+
     return coupon;
 };
 
-const deleteCoupon = async (id: string) => {
+const deleteCoupon = async (id: string, userId: string) => {
     const coupon = await CouponModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
@@ -136,6 +154,13 @@ const deleteCoupon = async (id: string) => {
     if (!coupon) {
         throw new ApiError(httpStatus.NOT_FOUND, "Coupon not found");
     }
+
+    // Log coupon deletion activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.COUPON_DELETE,
+        `Deleted coupon: ${coupon.code}`
+    );
 
     return coupon;
 };

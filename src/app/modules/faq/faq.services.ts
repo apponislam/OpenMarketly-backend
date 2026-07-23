@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import { IFaq } from "./faq.interface";
 import { FaqModel } from "./faq.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const DEFAULT_FAQS: Partial<IFaq>[] = [
     {
@@ -34,8 +36,17 @@ const DEFAULT_FAQS: Partial<IFaq>[] = [
     },
 ];
 
-const createFaq = async (data: Partial<IFaq>) => {
-    return await FaqModel.create(data);
+const createFaq = async (data: Partial<IFaq>, userId: string) => {
+    const faq = await FaqModel.create(data);
+
+    // Log FAQ creation
+    activityServices.logActivity(
+        userId,
+        ActivityType.FAQ_CREATE,
+        `Created FAQ: ${faq.question}`
+    );
+
+    return faq;
 };
 
 const getAllFaqs = async (
@@ -90,7 +101,7 @@ const getAllFaqs = async (
     };
 };
 
-const updateFaq = async (id: string, data: Partial<IFaq>) => {
+const updateFaq = async (id: string, data: Partial<IFaq>, userId: string) => {
     const faq = await FaqModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },
@@ -101,10 +112,17 @@ const updateFaq = async (id: string, data: Partial<IFaq>) => {
         throw new ApiError(httpStatus.NOT_FOUND, "FAQ item not found");
     }
 
+    // Log FAQ update activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.FAQ_UPDATE,
+        `Updated FAQ: ${faq.question}`
+    );
+
     return faq;
 };
 
-const deleteFaq = async (id: string) => {
+const deleteFaq = async (id: string, userId: string) => {
     const faq = await FaqModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
@@ -114,6 +132,13 @@ const deleteFaq = async (id: string) => {
     if (!faq) {
         throw new ApiError(httpStatus.NOT_FOUND, "FAQ item not found");
     }
+
+    // Log FAQ deletion activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.FAQ_DELETE,
+        `Deleted FAQ: ${faq.question}`
+    );
 
     return faq;
 };

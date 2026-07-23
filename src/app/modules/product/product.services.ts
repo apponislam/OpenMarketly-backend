@@ -4,6 +4,8 @@ import { IProduct } from "./product.interface";
 import { ProductModel } from "./product.model";
 import { CategoryModel } from "../category/category.model";
 import { WishlistModel } from "../wishlist/wishlist.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 export interface IProductQuery {
     search?: string;
@@ -40,6 +42,14 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
     };
 
     const product = await ProductModel.create(productData);
+
+    // Log product creation activity
+    activityServices.logActivity(
+        sellerId,
+        ActivityType.PRODUCT_CREATE,
+        `Created a new product: ${product.name} (SKU: ${product.sku})`
+    );
+
     return await product.populate([
         { path: "category", select: "name slug" },
         { path: "seller", select: "name email phone profileImage" },
@@ -239,6 +249,15 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         .populate("category", "name slug")
         .populate("seller", "name email profileImage");
 
+    if (updatedProduct) {
+        // Log product update activity
+        activityServices.logActivity(
+            sellerId,
+            ActivityType.PRODUCT_UPDATE,
+            `Updated product details for: ${updatedProduct.name}`
+        );
+    }
+
     return updatedProduct;
 };
 
@@ -258,6 +277,15 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
         { $set: { isDeleted: true } },
         { new: true }
     );
+
+    if (deletedProduct) {
+        // Log product deletion activity
+        activityServices.logActivity(
+            sellerId,
+            ActivityType.PRODUCT_DELETE,
+            `Deleted product: ${deletedProduct.name}`
+        );
+    }
 
     return deletedProduct;
 };

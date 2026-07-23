@@ -3,6 +3,8 @@ import ApiError from "../../../errors/ApiError";
 import { CartModel } from "./cart.model";
 import { ProductModel } from "../product/product.model";
 import { ICartItem } from "./cart.interface";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 export interface IAddToCartPayload {
     productId: string;
@@ -70,6 +72,13 @@ const addToCart = async (userId: string, payload: IAddToCartPayload) => {
     }
 
     await cart.save();
+
+    // Log cart sync/add activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.CART_SYNC,
+        `Added item: ${product.name} to cart`
+    );
 
     return await cart.populate({
         path: "items.product",
@@ -169,6 +178,13 @@ const clearCart = async (userId: string) => {
         { user: userId },
         { $set: { items: [], totalPrice: 0 } },
         { new: true }
+    );
+
+    // Log cart clear activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.CART_CLEAR,
+        "Cleared shopping cart"
     );
 
     return cart;

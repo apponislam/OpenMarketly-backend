@@ -2,8 +2,10 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import { ICategory } from "./category.interface";
 import { CategoryModel } from "./category.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
-const createCategory = async (data: Partial<ICategory>) => {
+const createCategory = async (data: Partial<ICategory>, userId: string) => {
     if (!data.name) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Category name is required");
     }
@@ -19,7 +21,16 @@ const createCategory = async (data: Partial<ICategory>) => {
         slug,
     };
 
-    return await CategoryModel.create(categoryData);
+    const category = await CategoryModel.create(categoryData);
+
+    // Log category creation activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.CATEGORY_CREATE,
+        `Created category: ${category.name}`
+    );
+
+    return category;
 };
 
 const getAllCategories = async (query: { search?: string; isActive?: string; page?: string; limit?: string }) => {
@@ -68,7 +79,7 @@ const getCategoryById = async (id: string) => {
     return category;
 };
 
-const updateCategory = async (id: string, data: Partial<ICategory>) => {
+const updateCategory = async (id: string, data: Partial<ICategory>, userId: string) => {
     if (data.name && !data.slug) {
         data.slug = data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
     }
@@ -90,10 +101,17 @@ const updateCategory = async (id: string, data: Partial<ICategory>) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
 
+    // Log category update activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.CATEGORY_UPDATE,
+        `Updated category details for: ${category.name}`
+    );
+
     return category;
 };
 
-const deleteCategory = async (id: string) => {
+const deleteCategory = async (id: string, userId: string) => {
     const category = await CategoryModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
@@ -103,6 +121,13 @@ const deleteCategory = async (id: string) => {
     if (!category) {
         throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
+
+    // Log category deletion activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.CATEGORY_DELETE,
+        `Deleted category: ${category.name}`
+    );
 
     return category;
 };

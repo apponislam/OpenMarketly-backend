@@ -5,7 +5,8 @@ import sendResponse from "../../../utils/sendResponse";
 import { couponServices } from "./coupon.services";
 
 const createCoupon = catchAsync(async (req: Request, res: Response) => {
-    const result = await couponServices.createCoupon(req.body);
+    const userId = req.user?._id;
+    const result = await couponServices.createCoupon(req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -46,7 +47,8 @@ const validateCoupon = catchAsync(async (req: Request, res: Response) => {
 
 const updateCoupon = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await couponServices.updateCoupon(id as string, req.body);
+    const userId = req.user?._id;
+    const result = await couponServices.updateCoupon(id as string, req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -58,7 +60,8 @@ const updateCoupon = catchAsync(async (req: Request, res: Response) => {
 
 const deleteCoupon = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await couponServices.deleteCoupon(id as string);
+    const userId = req.user?._id;
+    const result = await couponServices.deleteCoupon(id as string, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

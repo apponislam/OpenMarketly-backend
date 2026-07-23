@@ -7,6 +7,8 @@ import { UserModel } from "./auth.model";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { sendOtpEmail, sendVerificationEmail, sendWelcomeEmail, sendEmailUpdateVerification } from "../../../utils/emailTemplates";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const registerUser = async (data: any) => {
     // Check existing user
@@ -57,6 +59,13 @@ const registerUser = async (data: any) => {
     sendVerificationEmail(createdUser.email as string, createdUser.name as string, verificationUrl, verificationCode);
     sendWelcomeEmail(createdUser.email as string, createdUser.name as string);
 
+    // Log registration activity
+    activityServices.logActivity(
+        createdUser._id.toString(),
+        ActivityType.REGISTER,
+        `Registered a new account with email ${createdUser.email}`
+    );
+
     // Generate tokens
     const jwtPayload = {
         _id: createdUser._id,
@@ -90,6 +99,13 @@ const loginUser = async (data: { email: string; password: string }) => {
 
     // Update last login
     await UserModel.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
+
+    // Log login activity
+    activityServices.logActivity(
+        user._id.toString(),
+        ActivityType.LOGIN,
+        `Logged in successfully`
+    );
 
     // Generate tokens
     const jwtPayload = {
@@ -280,6 +296,13 @@ const resetPassword = async (token: string, newPassword: string) => {
     user.resetPasswordTokenExpiry = undefined;
 
     await user.save();
+
+    // Log password reset activity
+    activityServices.logActivity(
+        user._id.toString(),
+        ActivityType.PASSWORD_CHANGE,
+        "Reset password via email token"
+    );
 };
 
 const updateProfile = async (userId: string, data: any) => {
@@ -290,6 +313,13 @@ const updateProfile = async (userId: string, data: any) => {
     const user = await UserModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { $set: data }, { returnDocument: "after", runValidators: true }).select("-password");
 
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
+
+    // Log profile update activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.PROFILE_UPDATE,
+        "Updated profile information"
+    );
 
     return user;
 };
@@ -304,6 +334,13 @@ const changePassword = async (userId: string, currentPassword: string, newPasswo
     const hashedPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
     user.password = hashedPassword;
     await user.save();
+
+    // Log password change activity
+    activityServices.logActivity(
+        userId,
+        ActivityType.PASSWORD_CHANGE,
+        "Changed password via account settings"
+    );
 };
 
 const updateEmail = async (userId: string, newEmail: string, password: string) => {

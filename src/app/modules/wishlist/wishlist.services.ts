@@ -2,6 +2,8 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
 import { ProductModel } from "../product/product.model";
 import { WishlistModel } from "./wishlist.model";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
 
 const toggleWishlist = async (userId: string, productId: string) => {
     // Verify product exists and is active
@@ -15,10 +17,26 @@ const toggleWishlist = async (userId: string, productId: string) => {
     if (existingWishlist) {
         // Remove if already in wishlist
         await WishlistModel.deleteOne({ _id: existingWishlist._id });
+
+        // Log wishlist remove
+        activityServices.logActivity(
+            userId,
+            ActivityType.WISHLIST_REMOVE,
+            `Removed product: ${product.name} from wishlist`
+        );
+
         return { isWishlisted: false };
     } else {
         // Add if not in wishlist
         await WishlistModel.create({ user: userId, product: productId });
+
+        // Log wishlist add
+        activityServices.logActivity(
+            userId,
+            ActivityType.WISHLIST_ADD,
+            `Added product: ${product.name} to wishlist`
+        );
+
         return { isWishlisted: true };
     }
 };

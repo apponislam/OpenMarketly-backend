@@ -5,7 +5,8 @@ import sendResponse from "../../../utils/sendResponse";
 import { categoryServices } from "./category.services";
 
 const createCategory = catchAsync(async (req: Request, res: Response) => {
-    const result = await categoryServices.createCategory(req.body);
+    const userId = req.user?._id;
+    const result = await categoryServices.createCategory(req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -48,7 +49,8 @@ const getCategoryById = catchAsync(async (req: Request, res: Response) => {
 
 const updateCategory = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await categoryServices.updateCategory(id as string, req.body);
+    const userId = req.user?._id;
+    const result = await categoryServices.updateCategory(id as string, req.body, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -60,7 +62,8 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
 
 const deleteCategory = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await categoryServices.deleteCategory(id as string);
+    const userId = req.user?._id;
+    const result = await categoryServices.deleteCategory(id as string, userId as string);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
