@@ -15,6 +15,7 @@ import { disputeRoutes } from "../modules/dispute/dispute.routes";
 import { couponRoutes } from "../modules/coupon/coupon.routes";
 import { reportRoutes } from "../modules/report/report.routes";
 import { bannerRoutes } from "../modules/banner/banner.routes";
+import { settingsRoutes } from "../modules/settings/settings.routes";
 
 const router = express.Router();
 
@@ -82,6 +83,10 @@ const moduleRoutes = [
     {
         path: "/banners",
         route: bannerRoutes,
+    },
+    {
+        path: "/settings",
+        route: settingsRoutes,
     },
 ];
 
