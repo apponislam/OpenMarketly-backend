@@ -5,6 +5,8 @@ export interface IProductVariant {
     size?: string;
     sku?: string;
     price?: number;
+    originalPrice?: number;
+    discountPercentage?: number;
     stockQuantity?: number;
     image?: string;
 }

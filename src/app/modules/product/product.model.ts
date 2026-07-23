@@ -6,11 +6,13 @@ const variantSchema = new Schema(
         color: String,
         size: String,
         sku: String,
-        price: Number,
-        stockQuantity: Number,
+        price: { type: Number, min: [0, "Variant price cannot be negative"] },
+        originalPrice: { type: Number, min: [0, "Variant original price cannot be negative"] },
+        discountPercentage: { type: Number, min: [0, "Discount cannot be negative"], max: [100, "Discount cannot exceed 100"] },
+        stockQuantity: { type: Number, min: [0, "Stock cannot be negative"] },
         image: String,
     },
-    { _id: false }
+    { _id: false },
 );
 
 const specificationSchema = new Schema(
@@ -18,7 +20,7 @@ const specificationSchema = new Schema(
         key: { type: String, required: true },
         value: { type: String, required: true },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const productSchemaDefinition: any = {
@@ -150,16 +152,33 @@ const ProductSchema = new Schema<IProduct>(productSchemaDefinition, {
     versionKey: false,
 });
 
-// Pre-save hook for auto slug & auto SKU generation
+// Pre-save hook for auto slug, auto SKU, and auto price calculation
 ProductSchema.pre("save", function () {
     if (!this.slug && this.name) {
         const randomHex = Math.floor(1000 + Math.random() * 9000);
-        this.slug = `${this.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")}-${randomHex}`;
+        this.slug = `${this.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)+/g, "")}-${randomHex}`;
     }
 
     if (!this.sku) {
         const randomCode = Math.floor(100000 + Math.random() * 900000);
         this.sku = `SKU-${randomCode}`;
+    }
+
+    // Auto-calculate price from originalPrice & discountPercentage
+    if (this.originalPrice && this.discountPercentage) {
+        this.price = Math.round(this.originalPrice - (this.originalPrice * this.discountPercentage) / 100);
+    }
+
+    // Auto-calculate variant prices
+    if (this.variants && this.variants.length > 0) {
+        for (const variant of this.variants) {
+            if (variant.originalPrice && variant.discountPercentage) {
+                variant.price = Math.round(variant.originalPrice - (variant.originalPrice * variant.discountPercentage) / 100);
+            }
+        }
     }
 });
 
