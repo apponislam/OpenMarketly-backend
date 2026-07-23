@@ -20,9 +20,11 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
     const query = {
         search: req.query.search as string | undefined,
         category: req.query.category as string | undefined,
+        brand: req.query.brand as string | undefined,
+        color: req.query.color as string | undefined,
+        size: req.query.size as string | undefined,
         minPrice: req.query.minPrice ? Number(req.query.minPrice) : undefined,
         maxPrice: req.query.maxPrice ? Number(req.query.maxPrice) : undefined,
-        status: req.query.status as string | undefined,
         isFeatured: req.query.isFeatured as string | undefined,
         sellerId: req.query.sellerId as string | undefined,
         sortBy: req.query.sortBy as string | undefined,

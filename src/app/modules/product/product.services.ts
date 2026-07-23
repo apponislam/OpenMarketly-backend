@@ -7,9 +7,11 @@ import { CategoryModel } from "../category/category.model";
 export interface IProductQuery {
     search?: string;
     category?: string;
+    brand?: string;
+    color?: string;
+    size?: string;
     minPrice?: number;
     maxPrice?: number;
-    status?: string;
     isFeatured?: string;
     sellerId?: string;
     sortBy?: string;
@@ -48,6 +50,7 @@ const getAllProducts = async (query: IProductQuery) => {
         filter.$or = [
             { name: { $regex: query.search, $options: "i" } },
             { description: { $regex: query.search, $options: "i" } },
+            { brand: { $regex: query.search, $options: "i" } },
             { tags: { $in: [new RegExp(query.search, "i")] } },
         ];
     }
@@ -56,12 +59,28 @@ const getAllProducts = async (query: IProductQuery) => {
         filter.category = query.category;
     }
 
-    if (query.sellerId) {
-        filter.seller = query.sellerId;
+    if (query.brand) {
+        filter.brand = { $regex: query.brand, $options: "i" };
     }
 
-    if (query.status) {
-        filter.status = query.status;
+    if (query.color) {
+        filter.$or = filter.$or || [];
+        filter.$or.push(
+            { colors: { $in: [new RegExp(query.color, "i")] } },
+            { "variants.color": { $regex: query.color, $options: "i" } }
+        );
+    }
+
+    if (query.size) {
+        filter.$or = filter.$or || [];
+        filter.$or.push(
+            { sizes: { $in: [new RegExp(query.size, "i")] } },
+            { "variants.size": { $regex: query.size, $options: "i" } }
+        );
+    }
+
+    if (query.sellerId) {
+        filter.seller = query.sellerId;
     }
 
     if (query.isFeatured !== undefined) {
