@@ -6,14 +6,18 @@ import { recentlyViewedServices } from "./recentlyViewed.services";
 
 const addProductToRecentlyViewed = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    const { productId } = req.body;
+    const { productId, productIds } = req.body;
 
-    await recentlyViewedServices.addProductToRecentlyViewed(userId as string, productId);
+    const targetIds = productIds || productId;
+
+    if (targetIds) {
+        await recentlyViewedServices.addProductToRecentlyViewed(userId as string, targetIds);
+    }
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Product added to recently viewed",
+        message: "Products added to recently viewed list",
         data: null,
     });
 });

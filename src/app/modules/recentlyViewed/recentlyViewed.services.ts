@@ -1,12 +1,16 @@
 import { RecentlyViewedModel } from "./recentlyViewed.model";
 
-const addProductToRecentlyViewed = async (userId: string, productId: string) => {
-    // Upsert the view history to keep viewedAt updated
-    await RecentlyViewedModel.findOneAndUpdate(
-        { user: userId, product: productId },
-        { viewedAt: new Date() },
-        { upsert: true, new: true }
-    );
+const addProductToRecentlyViewed = async (userId: string, productIds: string | string[]) => {
+    const ids = Array.isArray(productIds) ? productIds : [productIds];
+    
+    // Perform bulk upserts/updates for each product ID
+    for (const productId of ids) {
+        await RecentlyViewedModel.findOneAndUpdate(
+            { user: userId, product: productId },
+            { viewedAt: new Date() },
+            { upsert: true, new: true }
+        );
+    }
 
     // Limit history: only keep the most recent 20 viewed products per user
     const totalCount = await RecentlyViewedModel.countDocuments({ user: userId });
