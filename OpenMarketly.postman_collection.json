@@ -1,0 +1,1806 @@
+{
+	"info": {
+		"_postman_id": "bfd9a103-dc77-4402-95f8-8a8b7a66ef8d",
+		"name": "OpenMarketly Full API Collection",
+		"description": "Comprehensive Postman collection containing all routes across all 20 modules in the OpenMarketly backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123!\",\n  \"role\": \"CUSTOMER\",\n  \"gender\": \"MALE\",\n  \"phone\": \"+8801712345678\",\n  \"profileImage\": \"https://example.com/avatar.jpg\",\n  \"referralCode\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/register",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/login",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "login"]
+						}
+					}
+				},
+				{
+					"name": "Verify Email",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/auth/verify-email?email=john@example.com&token=token123&otp=123456",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "verify-email"],
+							"query": [
+								{"key": "email", "value": "john@example.com"},
+								{"key": "token", "value": "token123"},
+								{"key": "otp", "value": "123456"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Resend Verification Email",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/resend-verification",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "resend-verification"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Access Token",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseurl}}/auth/refresh-token",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "refresh-token"]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/forgot-password",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "forgot-password"]
+						}
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/verify-otp",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "verify-otp"]
+						}
+					}
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/resend-otp",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "resend-otp"]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john@example.com\",\n  \"token\": \"token123\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/reset-password",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "reset-password"]
+						}
+					}
+				},
+				{
+					"name": "Get Profile (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/auth/me",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"url": {
+							"raw": "{{baseurl}}/auth/logout",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "logout"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"John Updated\",\n  \"gender\": \"MALE\",\n  \"phone\": \"+8801700000000\",\n  \"profileImage\": \"https://example.com/updated-avatar.jpg\",\n  \"aboutme\": \"Love tech.\",\n  \"address\": {\n    \"street\": \"123 Tech Lane\",\n    \"city\": \"Dhaka\",\n    \"state\": \"Dhaka\",\n    \"zipCode\": \"1212\",\n    \"country\": \"Bangladesh\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/profile",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Change Password",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/change-password",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "change-password"]
+						}
+					}
+				},
+				{
+					"name": "Update Email Request",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newEmail\": \"johnnew@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/update-email",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "update-email"]
+						}
+					}
+				},
+				{
+					"name": "Verify New Email",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/auth/verify-new-email?token=token123&email=johnnew@example.com",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "verify-new-email"],
+							"query": [
+								{"key": "token", "value": "token123"},
+								{"key": "email", "value": "johnnew@example.com"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Resend Email Update verification",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"url": {
+							"raw": "{{baseurl}}/auth/resend-email-update",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "resend-email-update"]
+						}
+					}
+				},
+				{
+					"name": "Delete Account (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/auth/me",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "me"]
+						}
+					}
+				},
+				{
+					"name": "Set Password for User (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newPassword\": \"ForcePassword123!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/set-password/64d1f2780e922c2bb4d81234",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "set-password", "64d1f2780e922c2bb4d81234"]
+						}
+					}
+				},
+				{
+					"name": "Delete User by Admin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/auth/64d1f2780e922c2bb4d81234",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "64d1f2780e922c2bb4d81234"]
+						}
+					}
+				},
+				{
+					"name": "Change User Role (Super Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{superadminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"role\": \"SELLER\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/auth/change-role/64d1f2780e922c2bb4d81234",
+							"host": ["{{baseurl}}"],
+							"path": ["auth", "change-role", "64d1f2780e922c2bb4d81234"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Category",
+			"item": [
+				{
+					"name": "Create Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Smartphones\",\n  \"description\": \"iOS and Android mobile phones.\",\n  \"image\": \"https://example.com/smartphones.jpg\",\n  \"parentCategory\": null,\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/categories",
+							"host": ["{{baseurl}}"],
+							"path": ["categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Parent Categories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/categories/parents",
+							"host": ["{{baseurl}}"],
+							"path": ["categories", "parents"]
+						}
+					}
+				},
+				{
+					"name": "Get Subcategories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/categories/subcategories/64d1f2780e922c2bb4d85678",
+							"host": ["{{baseurl}}"],
+							"path": ["categories", "subcategories", "64d1f2780e922c2bb4d85678"]
+						}
+					}
+				},
+				{
+					"name": "Get All Categories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/categories?isActive=true&page=1&limit=10",
+							"host": ["{{baseurl}}"],
+							"path": ["categories"],
+							"query": [
+								{"key": "isActive", "value": "true"},
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Category By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/categories/64d1f2780e922c2bb4d85678",
+							"host": ["{{baseurl}}"],
+							"path": ["categories", "64d1f2780e922c2bb4d85678"]
+						}
+					}
+				},
+				{
+					"name": "Update Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Smartphones Updated\",\n  \"description\": \"Updated description for category.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/categories/64d1f2780e922c2bb4d85678",
+							"host": ["{{baseurl}}"],
+							"path": ["categories", "64d1f2780e922c2bb4d85678"]
+						}
+					}
+				},
+				{
+					"name": "Delete Category",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/categories/64d1f2780e922c2bb4d85678",
+							"host": ["{{baseurl}}"],
+							"path": ["categories", "64d1f2780e922c2bb4d85678"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"brand\": \"Apple\",\n  \"category\": \"64d1f2780e922c2bb4d85678\",\n  \"description\": \"Flagship phone with dynamic island.\",\n  \"shortDescription\": \"iPhone 15 Pro Max 256GB\",\n  \"price\": 145000,\n  \"originalPrice\": 150000,\n  \"discountPercentage\": 3,\n  \"stockQuantity\": 50,\n  \"colors\": [\"Titanium Gray\", \"Black\"],\n  \"sizes\": [\"256GB\", \"512GB\"],\n  \"variants\": [\n    {\n      \"color\": \"Titanium Gray\",\n      \"size\": \"256GB\",\n      \"price\": 145000,\n      \"originalPrice\": 150000,\n      \"discountPercentage\": 3,\n      \"stockQuantity\": 25,\n      \"image\": \"https://example.com/gray.jpg\"\n    }\n  ],\n  \"specifications\": [\n    {\"key\": \"RAM\", \"value\": \"8GB\"},\n    {\"key\": \"Storage\", \"value\": \"256GB\"}\n  ],\n  \"thumbnail\": \"https://example.com/iphone-thumb.jpg\",\n  \"images\": [\"https://example.com/1.jpg\", \"https://example.com/2.jpg\"],\n  \"unit\": \"Piece\",\n  \"weight\": \"221g\",\n  \"dimensions\": \"159 x 76 mm\",\n  \"warranty\": \"1 Year\",\n  \"returnPolicy\": \"7 Days\",\n  \"tags\": [\"mobile\", \"ios\"],\n  \"approvalStatus\": \"PENDING\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/products",
+							"host": ["{{baseurl}}"],
+							"path": ["products"]
+						}
+					}
+				},
+				{
+					"name": "Get All Products",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/products?search=iPhone&category=64d1f2780e922c2bb4d85678&minPrice=100000&maxPrice=200000&page=1&limit=10",
+							"host": ["{{baseurl}}"],
+							"path": ["products"],
+							"query": [
+								{"key": "search", "value": "iPhone"},
+								{"key": "category", "value": "64d1f2780e922c2bb4d85678"},
+								{"key": "minPrice", "value": "100000"},
+								{"key": "maxPrice", "value": "200000"},
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product By Slug",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/products/slug/iphone-15-pro-max-9821",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "slug", "iphone-15-pro-max-9821"]
+						}
+					}
+				},
+				{
+					"name": "Get Product By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/products/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				},
+				{
+					"name": "Get My Products (Seller only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/products/my/products",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "my", "products"]
+						}
+					}
+				},
+				{
+					"name": "Update Product (with removeImages)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"iPhone 15 Pro Max Updated\",\n  \"price\": 143000,\n  \"removeImages\": [\n    \"https://example.com/2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/products/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				},
+				{
+					"name": "Approve Product (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"approvalStatus\": \"APPROVED\",\n  \"adminRemarks\": \"Product features are correct.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/products/64d1f2780e922c2bb4d89999/approve",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "64d1f2780e922c2bb4d89999", "approve"]
+						}
+					}
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/products/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["products", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Cart",
+			"item": [
+				{
+					"name": "Get My Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/carts/my",
+							"host": ["{{baseurl}}"],
+							"path": ["carts", "my"]
+						}
+					}
+				},
+				{
+					"name": "Add To Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"64d1f2780e922c2bb4d89999\",\n  \"quantity\": 2,\n  \"color\": \"Titanium Gray\",\n  \"size\": \"256GB\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/carts/add",
+							"host": ["{{baseurl}}"],
+							"path": ["carts", "add"]
+						}
+					}
+				},
+				{
+					"name": "Update Cart Item Quantity",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"64d1f2780e922c2bb4d89999\",\n  \"quantity\": 5,\n  \"color\": \"Titanium Gray\",\n  \"size\": \"256GB\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/carts/update",
+							"host": ["{{baseurl}}"],
+							"path": ["carts", "update"]
+						}
+					}
+				},
+				{
+					"name": "Remove Item from Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/carts/item/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["carts", "item", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				},
+				{
+					"name": "Clear Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/carts/clear",
+							"host": ["{{baseurl}}"],
+							"path": ["carts", "clear"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Order",
+			"item": [
+				{
+					"name": "Checkout Cart",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"shippingAddress\": {\n    \"street\": \"123 Tech Lane\",\n    \"city\": \"Dhaka\",\n    \"state\": \"Dhaka\",\n    \"zipCode\": \"1212\",\n    \"country\": \"Bangladesh\",\n    \"phone\": \"+8801700000000\"\n  },\n  \"couponCode\": \"SAVE10\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/orders/checkout",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "checkout"]
+						}
+					}
+				},
+				{
+					"name": "Direct Checkout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"64d1f2780e922c2bb4d89999\",\n  \"quantity\": 1,\n  \"color\": \"Titanium Gray\",\n  \"size\": \"256GB\",\n  \"shippingAddress\": {\n    \"street\": \"123 Tech Lane\",\n    \"city\": \"Dhaka\",\n    \"state\": \"Dhaka\",\n    \"zipCode\": \"1212\",\n    \"country\": \"Bangladesh\",\n    \"phone\": \"+8801700000000\"\n  },\n  \"couponCode\": \"\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/orders/direct-checkout",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "direct-checkout"]
+						}
+					}
+				},
+				{
+					"name": "Get My Orders",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/orders/my",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "my"]
+						}
+					}
+				},
+				{
+					"name": "Get Order By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/orders/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				},
+				{
+					"name": "Payment Success Callback",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"val_id\": \"val1234567890\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/orders/payment/success/TXN-123456",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "payment", "success", "TXN-123456"]
+						}
+					}
+				},
+				{
+					"name": "Payment Fail Callback",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseurl}}/orders/payment/fail/TXN-123456",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "payment", "fail", "TXN-123456"]
+						}
+					}
+				},
+				{
+					"name": "Payment Cancel Callback",
+					"request": {
+						"method": "POST",
+						"url": {
+							"raw": "{{baseurl}}/orders/payment/cancel/TXN-123456",
+							"host": ["{{baseurl}}"],
+							"path": ["orders", "payment", "cancel", "TXN-123456"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Contact",
+			"item": [
+				{
+					"name": "Submit Contact Message",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@example.com\",\n  \"subject\": \"Partnership Inquiry\",\n  \"message\": \"I would like to explore integration possibilities.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/contacts",
+							"host": ["{{baseurl}}"],
+							"path": ["contacts"]
+						}
+					}
+				},
+				{
+					"name": "Get All Contact Messages (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/contacts",
+							"host": ["{{baseurl}}"],
+							"path": ["contacts"]
+						}
+					}
+				},
+				{
+					"name": "Get Contact Message By ID (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/contacts/64d1f2780e922c2bb4d8a111",
+							"host": ["{{baseurl}}"],
+							"path": ["contacts", "64d1f2780e922c2bb4d8a111"]
+						}
+					}
+				},
+				{
+					"name": "Reply to Contact Message (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"replyMessage\": \"Hello Alice, thank you for reaching out. We will call you soon.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/contacts/64d1f2780e922c2bb4d8a111/reply",
+							"host": ["{{baseurl}}"],
+							"path": ["contacts", "64d1f2780e922c2bb4d8a111", "reply"]
+						}
+					}
+				},
+				{
+					"name": "Delete Contact Message (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/contacts/64d1f2780e922c2bb4d8a111",
+							"host": ["{{baseurl}}"],
+							"path": ["contacts", "64d1f2780e922c2bb4d8a111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Feedback",
+			"item": [
+				{
+					"name": "Create Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"subject\": \"Mobile App Suggestion\",\n  \"comment\": \"It would be great to have dark mode in mobile layout!\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/feedbacks",
+							"host": ["{{baseurl}}"],
+							"path": ["feedbacks"]
+						}
+					}
+				},
+				{
+					"name": "Get All Feedbacks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/feedbacks",
+							"host": ["{{baseurl}}"],
+							"path": ["feedbacks"]
+						}
+					}
+				},
+				{
+					"name": "Update Feedback Status (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"RESOLVED\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/feedbacks/64d1f2780e922c2bb4d8b111/status",
+							"host": ["{{baseurl}}"],
+							"path": ["feedbacks", "64d1f2780e922c2bb4d8b111", "status"]
+						}
+					}
+				},
+				{
+					"name": "Delete Feedback",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/feedbacks/64d1f2780e922c2bb4d8b111",
+							"host": ["{{baseurl}}"],
+							"path": ["feedbacks", "64d1f2780e922c2bb4d8b111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "FAQ",
+			"item": [
+				{
+					"name": "Get All FAQs",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/faqs",
+							"host": ["{{baseurl}}"],
+							"path": ["faqs"]
+						}
+					}
+				},
+				{
+					"name": "Create FAQ (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"question\": \"How long does shipping take?\",\n  \"answer\": \"Shipping usually takes 2-3 business days within Dhaka and 3-5 days outside Dhaka.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/faqs",
+							"host": ["{{baseurl}}"],
+							"path": ["faqs"]
+						}
+					}
+				},
+				{
+					"name": "Update FAQ (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"question\": \"How long does delivery take?\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/faqs/64d1f2780e922c2bb4d8c111",
+							"host": ["{{baseurl}}"],
+							"path": ["faqs", "64d1f2780e922c2bb4d8c111"]
+						}
+					}
+				},
+				{
+					"name": "Delete FAQ (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/faqs/64d1f2780e922c2bb4d8c111",
+							"host": ["{{baseurl}}"],
+							"path": ["faqs", "64d1f2780e922c2bb4d8c111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Visitor",
+			"item": [
+				{
+					"name": "Track Visit",
+					"request": {
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ipAddress\": \"192.168.1.1\",\n  \"userAgent\": \"Mozilla/5.0...\",\n  \"pageUrl\": \"/home\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/visitors/track",
+							"host": ["{{baseurl}}"],
+							"path": ["visitors", "track"]
+						}
+					}
+				},
+				{
+					"name": "Get Visitor Stats (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/visitors/stats",
+							"host": ["{{baseurl}}"],
+							"path": ["visitors", "stats"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Rating",
+			"item": [
+				{
+					"name": "Get Product Ratings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/ratings/product/64d1f2780e922c2bb4d89999?page=1&limit=10",
+							"host": ["{{baseurl}}"],
+							"path": ["ratings", "product", "64d1f2780e922c2bb4d89999"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Product Rating Summary",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/ratings/summary/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["ratings", "summary", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				},
+				{
+					"name": "Create or Update Rating",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"product\": \"64d1f2780e922c2bb4d89999\",\n  \"rating\": 5,\n  \"comment\": \"Excellent build quality!\",\n  \"images\": [\"https://example.com/review1.jpg\"]\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/ratings",
+							"host": ["{{baseurl}}"],
+							"path": ["ratings"]
+						}
+					}
+				},
+				{
+					"name": "Delete Rating",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/ratings/64d1f2780e922c2bb4d8d111",
+							"host": ["{{baseurl}}"],
+							"path": ["ratings", "64d1f2780e922c2bb4d8d111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Wishlist",
+			"item": [
+				{
+					"name": "Get My Wishlist",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/wishlists?page=1&limit=10",
+							"host": ["{{baseurl}}"],
+							"path": ["wishlists"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Toggle Wishlist Item",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"64d1f2780e922c2bb4d89999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/wishlists/toggle",
+							"host": ["{{baseurl}}"],
+							"path": ["wishlists", "toggle"]
+						}
+					}
+				},
+				{
+					"name": "Check If Wishlisted",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/wishlists/check/64d1f2780e922c2bb4d89999",
+							"host": ["{{baseurl}}"],
+							"path": ["wishlists", "check", "64d1f2780e922c2bb4d89999"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Policy",
+			"item": [
+				{
+					"name": "Get All Policies",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/policies",
+							"host": ["{{baseurl}}"],
+							"path": ["policies"]
+						}
+					}
+				},
+				{
+					"name": "Get Policy By Type",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/policies/PRIVACY_POLICY",
+							"host": ["{{baseurl}}"],
+							"path": ["policies", "PRIVACY_POLICY"]
+						}
+					}
+				},
+				{
+					"name": "Create or Update Policy (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"type\": \"PRIVACY_POLICY\",\n  \"content\": \"We respect your privacy and protect your personal data.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/policies",
+							"host": ["{{baseurl}}"],
+							"path": ["policies"]
+						}
+					}
+				},
+				{
+					"name": "Delete Policy (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/policies/PRIVACY_POLICY",
+							"host": ["{{baseurl}}"],
+							"path": ["policies", "PRIVACY_POLICY"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Dispute",
+			"item": [
+				{
+					"name": "Raise Dispute",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"order\": \"64d1f2780e922c2bb4d89999\",\n  \"reason\": \"Item not delivered\",\n  \"description\": \"I paid for the order but have not received it yet.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/disputes",
+							"host": ["{{baseurl}}"],
+							"path": ["disputes"]
+						}
+					}
+				},
+				{
+					"name": "Get My Disputes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/disputes/my",
+							"host": ["{{baseurl}}"],
+							"path": ["disputes", "my"]
+						}
+					}
+				},
+				{
+					"name": "Get All Disputes (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/disputes",
+							"host": ["{{baseurl}}"],
+							"path": ["disputes"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Dispute (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionDetails\": \"Refund issued to user wallet.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/disputes/resolve/64d1f2780e922c2bb4d8e111",
+							"host": ["{{baseurl}}"],
+							"path": ["disputes", "resolve", "64d1f2780e922c2bb4d8e111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Coupon",
+			"item": [
+				{
+					"name": "Validate Coupon",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/coupons/validate?code=SAVE10&orderAmount=1000",
+							"host": ["{{baseurl}}"],
+							"path": ["coupons", "validate"],
+							"query": [
+								{"key": "code", "value": "SAVE10"},
+								{"key": "orderAmount", "value": "1000"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get All Coupons",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/coupons",
+							"host": ["{{baseurl}}"],
+							"path": ["coupons"]
+						}
+					}
+				},
+				{
+					"name": "Create Coupon (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"SAVE10\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 10,\n  \"maxDiscountAmount\": 200,\n  \"minOrderAmount\": 500,\n  \"startDate\": \"2026-01-01T00:00:00.000Z\",\n  \"endDate\": \"2027-12-31T23:59:59.000Z\",\n  \"usageLimit\": 100\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/coupons",
+							"host": ["{{baseurl}}"],
+							"path": ["coupons"]
+						}
+					}
+				},
+				{
+					"name": "Update Coupon (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"discountValue\": 15\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/coupons/64d1f2780e922c2bb4d8f111",
+							"host": ["{{baseurl}}"],
+							"path": ["coupons", "64d1f2780e922c2bb4d8f111"]
+						}
+					}
+				},
+				{
+					"name": "Delete Coupon (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/coupons/64d1f2780e922c2bb4d8f111",
+							"host": ["{{baseurl}}"],
+							"path": ["coupons", "64d1f2780e922c2bb4d8f111"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Report",
+			"item": [
+				{
+					"name": "Create Report",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"targetType\": \"PRODUCT\",\n  \"targetId\": \"64d1f2780e922c2bb4d89999\",\n  \"reason\": \"Counterfeit product\",\n  \"description\": \"This product is copy and fake.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/reports",
+							"host": ["{{baseurl}}"],
+							"path": ["reports"]
+						}
+					}
+				},
+				{
+					"name": "Get Report By ID",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/reports/64d1f2780e922c2bb4d8a222",
+							"host": ["{{baseurl}}"],
+							"path": ["reports", "64d1f2780e922c2bb4d8a222"]
+						}
+					}
+				},
+				{
+					"name": "Get All Reports (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/reports",
+							"host": ["{{baseurl}}"],
+							"path": ["reports"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Report (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"RESOLVED\",\n  \"actionTaken\": \"Product suspended\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/reports/resolve/64d1f2780e922c2bb4d8a222",
+							"host": ["{{baseurl}}"],
+							"path": ["reports", "resolve", "64d1f2780e922c2bb4d8a222"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Banner",
+			"item": [
+				{
+					"name": "Get All Banners",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/banners",
+							"host": ["{{baseurl}}"],
+							"path": ["banners"]
+						}
+					}
+				},
+				{
+					"name": "Get Banner By ID",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/banners/64d1f2780e922c2bb4d8c222",
+							"host": ["{{baseurl}}"],
+							"path": ["banners", "64d1f2780e922c2bb4d8c222"]
+						}
+					}
+				},
+				{
+					"name": "Create Banner (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Eid Grand Sale\",\n  \"subtitle\": \"Up to 50% discount on smartphone collections!\",\n  \"image\": \"https://example.com/banner.jpg\",\n  \"link\": \"/category/smartphones\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/banners",
+							"host": ["{{baseurl}}"],
+							"path": ["banners"]
+						}
+					}
+				},
+				{
+					"name": "Update Banner (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Eid Mega Sale\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/banners/64d1f2780e922c2bb4d8c222",
+							"host": ["{{baseurl}}"],
+							"path": ["banners", "64d1f2780e922c2bb4d8c222"]
+						}
+					}
+				},
+				{
+					"name": "Delete Banner (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/banners/64d1f2780e922c2bb4d8c222",
+							"host": ["{{baseurl}}"],
+							"path": ["banners", "64d1f2780e922c2bb4d8c222"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Settings",
+			"item": [
+				{
+					"name": "Get Settings",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/settings",
+							"host": ["{{baseurl}}"],
+							"path": ["settings"]
+						}
+					}
+				},
+				{
+					"name": "Update Settings (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contactEmail\": \"support@openmarketly.com\",\n  \"contactPhone\": \"+8801999999999\",\n  \"contactAddress\": \"OpenMarketly HQ, Dhaka\",\n  \"socialLinks\": {\n    \"facebook\": \"https://facebook.com/openmarketly\"\n  },\n  \"isMaintenanceMode\": false,\n  \"allowGuestCheckout\": false,\n  \"allowSellerRegistration\": true,\n  \"autoApproveProducts\": false,\n  \"sellerCommissionRate\": 10\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/settings",
+							"host": ["{{baseurl}}"],
+							"path": ["settings"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Recently Viewed",
+			"item": [
+				{
+					"name": "Add to Recently Viewed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": \"64d1f2780e922c2bb4d89999\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/recently-viewed",
+							"host": ["{{baseurl}}"],
+							"path": ["recently-viewed"]
+						}
+					}
+				},
+				{
+					"name": "Get Recently Viewed Products",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/recently-viewed",
+							"host": ["{{baseurl}}"],
+							"path": ["recently-viewed"]
+						}
+					}
+				},
+				{
+					"name": "Clear Recently Viewed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "DELETE",
+						"url": {
+							"raw": "{{baseurl}}/recently-viewed",
+							"host": ["{{baseurl}}"],
+							"path": ["recently-viewed"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Activity",
+			"item": [
+				{
+					"name": "Get My Activities",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{customerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/activities",
+							"host": ["{{baseurl}}"],
+							"path": ["activities"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Withdraw",
+			"item": [
+				{
+					"name": "Create Withdraw Request (Seller only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "POST",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"amount\": 5000,\n  \"paymentMethod\": \"bKash\",\n  \"accountNumber\": \"01700000000\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/withdraws",
+							"host": ["{{baseurl}}"],
+							"path": ["withdraws"]
+						}
+					}
+				},
+				{
+					"name": "Get My Withdraw Requests (Seller only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{sellerToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/withdraws/my",
+							"host": ["{{baseurl}}"],
+							"path": ["withdraws", "my"]
+						}
+					}
+				},
+				{
+					"name": "Get All Withdraw Requests (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "GET",
+						"url": {
+							"raw": "{{baseurl}}/withdraws",
+							"host": ["{{baseurl}}"],
+							"path": ["withdraws"]
+						}
+					}
+				},
+				{
+					"name": "Resolve Withdraw Request (Admin only)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{"key": "token", "value": "{{adminToken}}", "type": "string"}]
+						},
+						"method": "PATCH",
+						"header": [{"key": "Content-Type", "value": "application/json"}],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"APPROVED\",\n  \"transactionId\": \"BKASH-TXN-12345\"\n}"
+						},
+						"url": {
+							"raw": "{{baseurl}}/withdraws/64d1f2780e922c2bb4d8f222/resolve",
+							"host": ["{{baseurl}}"],
+							"path": ["withdraws", "64d1f2780e922c2bb4d8f222", "resolve"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseurl",
+			"value": "http://localhost:5066/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "superadminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "adminToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "sellerToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "customerToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
