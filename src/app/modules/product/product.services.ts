@@ -284,9 +284,15 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         }
     }
 
+    const updateQuery: any = { $set: data };
+    if ((data as any).removeImages && (data as any).removeImages.length > 0) {
+        updateQuery.$pull = { images: { $in: (data as any).removeImages } };
+        delete (data as any).removeImages;
+    }
+
     const updatedProduct = await ProductModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
-        { $set: data },
+        updateQuery,
         { new: true, runValidators: true }
     )
         .populate("category", "name slug")

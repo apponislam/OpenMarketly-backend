@@ -16,7 +16,7 @@ export interface IProductSpecification {
     value: string;
 }
 
-export type ProductApprovalStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEED_EDIT';
+export type ProductApprovalStatus = "DRAFT" | "PENDING" | "APPROVED" | "REJECTED" | "NEED_EDIT";
 
 export interface IProduct {
     _id?: Types.ObjectId;
