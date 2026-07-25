@@ -291,6 +291,20 @@ const deleteUserByAdmin = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const changeUserRole = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    const result = await authServices.changeUserRole(userId as string, role);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "User role updated successfully",
+        data: result,
+    });
+});
+
 export const authControllers = {
     register,
 
@@ -313,4 +327,5 @@ export const authControllers = {
     setUserPassword,
     deleteAccount,
     deleteUserByAdmin,
+    changeUserRole,
 };

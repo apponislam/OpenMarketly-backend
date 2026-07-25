@@ -26,7 +26,8 @@ router.post("/resend-email-update", auth, authControllers.resendEmailUpdate);
 router.delete("/me", auth, authControllers.deleteAccount);
 
 // Admin only routes
-router.post("/set-password/:userId", auth, authorize(["ADMIN"]), authControllers.setUserPassword);
-router.delete("/:userId", auth, authorize(["ADMIN"]), authControllers.deleteUserByAdmin);
+router.post("/set-password/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), authControllers.setUserPassword);
+router.delete("/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), authControllers.deleteUserByAdmin);
+router.patch("/change-role/:userId", auth, authorize(["SUPER_ADMIN"]), authControllers.changeUserRole);
 
 export const authRoutes = router;

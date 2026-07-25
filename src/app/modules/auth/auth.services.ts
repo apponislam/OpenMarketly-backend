@@ -1,6 +1,7 @@
 import httpStatus from "http-status";
 import mongoose from "mongoose";
 import ApiError from "../../../errors/ApiError";
+import { UserRole } from "./auth.interface";
 import { jwtHelper } from "../../../utils/jwtHelper";
 import config from "../../config";
 import { UserModel } from "./auth.model";
@@ -430,6 +431,23 @@ const deleteUser = async (userId: string) => {
     return user;
 };
 
+const changeUserRole = async (userId: string, role: UserRole) => {
+    const validRoles: UserRole[] = ["SUPER_ADMIN", "ADMIN", "SELLER", "CUSTOMER"];
+    if (!validRoles.includes(role)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid user role");
+    }
+
+    const user = await UserModel.findOneAndUpdate(
+        { _id: userId, isDeleted: false },
+        { $set: { role } },
+        { new: true }
+    ).select("-password");
+
+    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+
+    return user;
+};
+
 export const authServices = {
     registerUser,
     loginUser,
@@ -448,4 +466,5 @@ export const authServices = {
     verifyNewEmail,
     setUserPassword,
     deleteUser,
+    changeUserRole,
 };
