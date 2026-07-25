@@ -7,42 +7,39 @@ import { WishlistModel } from "../wishlist/wishlist.model";
 
 const getAdminStats = async () => {
     // 1. User stats by role
-    const userStatsData = await UserModel.aggregate([
+    const userStats = (await UserModel.aggregate([
         { $match: { isDeleted: false } },
         {
             $group: {
-                _id: "$role",
-                count: { $sum: 1 },
+                _id: null,
+                totalCustomers: { $sum: { $cond: [{ $eq: ["$role", "CUSTOMER"] }, 1, 0] } },
+                totalSellers: { $sum: { $cond: [{ $eq: ["$role", "SELLER"] }, 1, 0] } },
+                totalAdmins: { $sum: { $cond: [{ $eq: ["$role", "ADMIN"] }, 1, 0] } },
+                totalSuperAdmins: { $sum: { $cond: [{ $eq: ["$role", "SUPER_ADMIN"] }, 1, 0] } },
             },
         },
-    ]);
-
-    const userStats = {
+    ]))[0] || {
         totalCustomers: 0,
         totalSellers: 0,
         totalAdmins: 0,
         totalSuperAdmins: 0,
     };
 
-    userStatsData.forEach((stat) => {
-        if (stat._id === "CUSTOMER") userStats.totalCustomers = stat.count;
-        else if (stat._id === "SELLER") userStats.totalSellers = stat.count;
-        else if (stat._id === "ADMIN") userStats.totalAdmins = stat.count;
-        else if (stat._id === "SUPER_ADMIN") userStats.totalSuperAdmins = stat.count;
-    });
-
     // 2. Product stats by status
-    const productStatsData = await ProductModel.aggregate([
+    const productStats = (await ProductModel.aggregate([
         { $match: { isDeleted: false } },
         {
             $group: {
-                _id: "$approvalStatus",
-                count: { $sum: 1 },
+                _id: null,
+                totalProducts: { $sum: 1 },
+                draft: { $sum: { $cond: [{ $eq: ["$approvalStatus", "DRAFT"] }, 1, 0] } },
+                pending: { $sum: { $cond: [{ $eq: ["$approvalStatus", "PENDING"] }, 1, 0] } },
+                approved: { $sum: { $cond: [{ $eq: ["$approvalStatus", "APPROVED"] }, 1, 0] } },
+                rejected: { $sum: { $cond: [{ $eq: ["$approvalStatus", "REJECTED"] }, 1, 0] } },
+                needEdit: { $sum: { $cond: [{ $eq: ["$approvalStatus", "NEED_EDIT"] }, 1, 0] } },
             },
         },
-    ]);
-
-    const productStats = {
+    ]))[0] || {
         totalProducts: 0,
         draft: 0,
         pending: 0,
@@ -51,52 +48,33 @@ const getAdminStats = async () => {
         needEdit: 0,
     };
 
-    productStatsData.forEach((stat) => {
-        if (stat._id === "DRAFT") productStats.draft = stat.count;
-        else if (stat._id === "PENDING") productStats.pending = stat.count;
-        else if (stat._id === "APPROVED") productStats.approved = stat.count;
-        else if (stat._id === "REJECTED") productStats.rejected = stat.count;
-        else if (stat._id === "NEED_EDIT") productStats.needEdit = stat.count;
-    });
-    productStats.totalProducts = Object.values(productStats).reduce((a, b) => a + b, 0) - productStats.totalProducts;
-
     // 3. Order stats & financial overview (revenue and commission)
-    const financialStats = await OrderModel.aggregate([
+    const orderStats = (await OrderModel.aggregate([
         {
-            $facet: {
-                summary: [
-                    { $match: { paymentStatus: "PAID" } },
-                    {
-                        $group: {
-                            _id: null,
-                            totalRevenue: { $sum: "$totalPrice" },
-                            totalCommission: {
-                                $sum: {
-                                    $sum: "$items.adminCommission",
-                                },
-                            },
-                        },
+            $group: {
+                _id: null,
+                totalOrders: { $sum: 1 },
+                totalRevenue: { $sum: { $cond: [{ $eq: ["$paymentStatus", "PAID"] }, "$totalPrice", 0] } },
+                totalCommission: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$paymentStatus", "PAID"] },
+                            { $sum: "$items.adminCommission" },
+                            0,
+                        ],
                     },
-                ],
-                statusCounts: [
-                    {
-                        $group: {
-                            _id: "$orderStatus",
-                            count: { $sum: 1 },
-                        },
-                    },
-                ],
+                },
+                pending: { $sum: { $cond: [{ $eq: ["$orderStatus", "PENDING"] }, 1, 0] } },
+                processing: { $sum: { $cond: [{ $eq: ["$orderStatus", "PROCESSING"] }, 1, 0] } },
+                shipped: { $sum: { $cond: [{ $eq: ["$orderStatus", "SHIPPED"] }, 1, 0] } },
+                delivered: { $sum: { $cond: [{ $eq: ["$orderStatus", "DELIVERED"] }, 1, 0] } },
+                cancelled: { $sum: { $cond: [{ $eq: ["$orderStatus", "CANCELLED"] }, 1, 0] } },
             },
         },
-    ]);
-
-    const summary = financialStats[0]?.summary[0] || { totalRevenue: 0, totalCommission: 0 };
-    const statusCounts = financialStats[0]?.statusCounts || [];
-
-    const orderStats = {
+    ]))[0] || {
         totalOrders: 0,
-        totalRevenue: summary.totalRevenue,
-        totalCommission: summary.totalCommission,
+        totalRevenue: 0,
+        totalCommission: 0,
         pending: 0,
         processing: 0,
         shipped: 0,
@@ -104,37 +82,21 @@ const getAdminStats = async () => {
         cancelled: 0,
     };
 
-    statusCounts.forEach((stat: any) => {
-        if (stat._id === "PENDING") orderStats.pending = stat.count;
-        else if (stat._id === "PROCESSING") orderStats.processing = stat.count;
-        else if (stat._id === "SHIPPED") orderStats.shipped = stat.count;
-        else if (stat._id === "DELIVERED") orderStats.delivered = stat.count;
-        else if (stat._id === "CANCELLED") orderStats.cancelled = stat.count;
-    });
-    orderStats.totalOrders = await OrderModel.countDocuments();
-
     // 4. Withdraw stats
-    const withdrawStatsData = await WithdrawModel.aggregate([
+    const withdrawStats = (await WithdrawModel.aggregate([
         {
             $group: {
-                _id: "$status",
-                amount: { $sum: "$amount" },
-                count: { $sum: 1 },
+                _id: null,
+                totalPendingAmount: { $sum: { $cond: [{ $eq: ["$status", "PENDING"] }, "$amount", 0] } },
+                totalApprovedAmount: { $sum: { $cond: [{ $eq: ["$status", "APPROVED"] }, "$amount", 0] } },
+                totalRequests: { $sum: 1 },
             },
         },
-    ]);
-
-    const withdrawStats = {
+    ]))[0] || {
         totalPendingAmount: 0,
         totalApprovedAmount: 0,
         totalRequests: 0,
     };
-
-    withdrawStatsData.forEach((stat) => {
-        if (stat._id === "PENDING") withdrawStats.totalPendingAmount = stat.amount;
-        else if (stat._id === "APPROVED") withdrawStats.totalApprovedAmount = stat.amount;
-        withdrawStats.totalRequests += stat.count;
-    });
 
     // 5. Recent 5 orders
     const recentOrders = await OrderModel.find()
