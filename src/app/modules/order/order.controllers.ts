@@ -24,6 +24,29 @@ const checkoutOrder = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const directCheckoutOrder = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user._id;
+    const { productId, quantity, color, size, shippingAddress, couponCode } = req.body;
+    const userContext = {
+        name: req.user.name,
+        email: req.user.email,
+        phone: req.user.phone,
+    };
+
+    const result = await orderServices.directCheckoutOrder(
+        userId,
+        { productId, quantity, color, size, shippingAddress, couponCode },
+        userContext
+    );
+
+    sendResponse(res, {
+        statusCode: httpStatus.CREATED,
+        success: true,
+        message: "Direct order placed. Redirecting to payment gateway.",
+        data: result,
+    });
+});
+
 const paymentSuccess = catchAsync(async (req: Request, res: Response) => {
     const { tranId } = req.params;
     const { val_id } = req.body; // val_id is sent in SSLCommerz redirect POST body
@@ -81,6 +104,7 @@ const getOrderById = catchAsync(async (req: Request, res: Response) => {
 
 export const orderControllers = {
     checkoutOrder,
+    directCheckoutOrder,
     paymentSuccess,
     paymentFail,
     paymentCancel,

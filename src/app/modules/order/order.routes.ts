@@ -6,6 +6,7 @@ const router = Router();
 
 // Order details & checkout (Require auth)
 router.post("/checkout", auth, orderControllers.checkoutOrder);
+router.post("/direct-checkout", auth, orderControllers.directCheckoutOrder);
 router.get("/my", auth, orderControllers.getMyOrders);
 router.get("/:id", auth, orderControllers.getOrderById);
 
