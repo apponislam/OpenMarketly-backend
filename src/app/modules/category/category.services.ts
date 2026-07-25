@@ -4,6 +4,7 @@ import { ICategory } from "./category.interface";
 import { CategoryModel } from "./category.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
+import { ProductModel } from "../product/product.model";
 
 const createCategory = async (data: Partial<ICategory>, userId: string) => {
     if (!data.name) {
@@ -122,11 +123,45 @@ const deleteCategory = async (id: string, userId: string) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Category not found");
     }
 
+    // Recursively find all child/descendant category IDs
+    const allCategoryIds: string[] = [id];
+    const findDescendants = async (parentIds: string[]) => {
+        const children = await CategoryModel.find({
+            parentCategory: { $in: parentIds },
+            isDeleted: false,
+        }).select("_id");
+        if (children.length > 0) {
+            const childIds = children.map((c) => c._id.toString());
+            allCategoryIds.push(...childIds);
+            await findDescendants(childIds);
+        }
+    };
+    await findDescendants([id]);
+
+    // Soft-delete all descendant subcategories
+    if (allCategoryIds.length > 1) {
+        await CategoryModel.updateMany(
+            { _id: { $in: allCategoryIds.slice(1) } },
+            { $set: { isDeleted: true } }
+        );
+    }
+
+    // Update all products in the deleted parent category and subcategories to NEED_EDIT
+    await ProductModel.updateMany(
+        { category: { $in: allCategoryIds }, isDeleted: false },
+        { 
+            $set: { 
+                approvalStatus: "NEED_EDIT", 
+                adminRemarks: "The category of this product was deleted. Please assign a new category." 
+            } 
+        }
+    );
+
     // Log category deletion activity
     activityServices.logActivity(
         userId,
         ActivityType.CATEGORY_DELETE,
-        `Deleted category: ${category.name}`
+        `Deleted category: ${category.name} and its subcategories`
     );
 
     return category;
