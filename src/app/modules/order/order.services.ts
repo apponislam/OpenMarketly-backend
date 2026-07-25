@@ -27,10 +27,10 @@ const checkoutOrder = async (
         throw new ApiError(httpStatus.BAD_REQUEST, "Your shopping cart is empty");
     }
 
-    // Verify stock levels for all products in cart
+    // Verify stock levels and approval status for all products in cart
     for (const item of cart.items) {
         const product: any = item.product;
-        if (!product || product.isDeleted || !product.isActive) {
+        if (!product || product.isDeleted || !product.isActive || !product.isApproved) {
             throw new ApiError(httpStatus.NOT_FOUND, "One or more products in your cart are no longer available");
         }
         if (product.stockQuantity < item.quantity) {

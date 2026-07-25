@@ -266,6 +266,14 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         }
     }
 
+    // Reset approval status if updated by a seller and autoApproveProducts setting is false
+    if (!["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
+        const settings = await settingsServices.getSettings();
+        if (settings.autoApproveProducts === false) {
+            data.isApproved = false;
+        }
+    }
+
     const updatedProduct = await ProductModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },

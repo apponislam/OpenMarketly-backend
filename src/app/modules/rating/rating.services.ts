@@ -14,8 +14,8 @@ const createOrUpdateRating = async (userId: string, data: Partial<IRating>) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Rating must be between 1 and 5 stars");
     }
 
-    // Verify product exists
-    const product = await ProductModel.findOne({ _id: data.product, isDeleted: false });
+    // Verify product exists and is approved
+    const product = await ProductModel.findOne({ _id: data.product, isDeleted: false, isApproved: true });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }

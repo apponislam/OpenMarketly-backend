@@ -21,8 +21,8 @@ const addToCart = async (userId: string, payload: IAddToCartPayload) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Product ID is required");
     }
 
-    // Verify product exists and has stock
-    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true });
+    // Verify product exists, is approved, and has stock
+    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true, isApproved: true });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found or unavailable");
     }
