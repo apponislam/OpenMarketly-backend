@@ -107,7 +107,6 @@ const OrderSchema = new Schema<IOrder>(orderSchemaDefinition, {
 });
 
 OrderSchema.index({ user: 1, createdAt: -1 });
-// OrderSchema.index({ transactionId: 1 }, { unique: true });
 OrderSchema.index({ paymentStatus: 1 });
 OrderSchema.index({ orderStatus: 1 });
 
