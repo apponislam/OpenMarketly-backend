@@ -15,7 +15,7 @@ const createOrUpdateRating = async (userId: string, data: Partial<IRating>) => {
     }
 
     // Verify product exists and is approved
-    const product = await ProductModel.findOne({ _id: data.product, isDeleted: false, isApproved: true });
+    const product = await ProductModel.findOne({ _id: data.product, isDeleted: false, approvalStatus: "APPROVED" });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }

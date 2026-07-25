@@ -30,7 +30,7 @@ const checkoutOrder = async (
     // Verify stock levels and approval status for all products in cart
     for (const item of cart.items) {
         const product: any = item.product;
-        if (!product || product.isDeleted || !product.isActive || !product.isApproved) {
+        if (!product || product.isDeleted || !product.isActive || product.approvalStatus !== "APPROVED") {
             throw new ApiError(httpStatus.NOT_FOUND, "One or more products in your cart are no longer available");
         }
         if (product.stockQuantity < item.quantity) {

@@ -1,6 +1,6 @@
 import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError";
-import { IProduct } from "./product.interface";
+import { IProduct, ProductApprovalStatus } from "./product.interface";
 import { ProductModel } from "./product.model";
 import { CategoryModel } from "../category/category.model";
 import { WishlistModel } from "../wishlist/wishlist.model";
@@ -19,7 +19,7 @@ export interface IProductQuery {
     isFeatured?: string;
     isTodayDeal?: string;
     isTrending?: string;
-    isApproved?: string;
+    approvalStatus?: string;
     sellerId?: string;
     sortBy?: string;
     sortOrder?: "asc" | "desc";
@@ -40,12 +40,18 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
 
     // Fetch site settings to check autoApproveProducts
     const settings = await settingsServices.getSettings();
-    const isApproved = settings.autoApproveProducts !== false;
+    let approvalStatus: ProductApprovalStatus = "PENDING";
+
+    if (data.approvalStatus === "DRAFT") {
+        approvalStatus = "DRAFT";
+    } else if (settings.autoApproveProducts !== false) {
+        approvalStatus = "APPROVED";
+    }
 
     const productData = {
         ...data,
         seller: sellerId,
-        isApproved,
+        approvalStatus,
     };
 
     const product = await ProductModel.create(productData);
@@ -67,11 +73,11 @@ const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: 
     const filter: any = { isDeleted: false, isActive: true };
 
     if (userRole && ["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
-        if (query.isApproved !== undefined) {
-            filter.isApproved = query.isApproved === "true";
+        if (query.approvalStatus !== undefined) {
+            filter.approvalStatus = query.approvalStatus;
         }
     } else {
-        filter.isApproved = true;
+        filter.approvalStatus = "APPROVED";
     }
 
     if (query.search) {
@@ -202,8 +208,8 @@ const getProductById = async (id: string, userId?: string, userRole?: string) =>
     }
 
     // If product is not approved, only the seller, admin or super admin can view it
-    if (!product.isApproved && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
-        throw new ApiError(httpStatus.FORBIDDEN, "Product is pending approval");
+    if (product.approvalStatus !== "APPROVED" && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
+        throw new ApiError(httpStatus.FORBIDDEN, "Product is not approved");
     }
 
     const productObj = product.toObject() as any;
@@ -227,8 +233,8 @@ const getProductBySlug = async (slug: string, userId?: string, userRole?: string
     }
 
     // If product is not approved, only the seller, admin or super admin can view it
-    if (!product.isApproved && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
-        throw new ApiError(httpStatus.FORBIDDEN, "Product is pending approval");
+    if (product.approvalStatus !== "APPROVED" && product.seller.toString() !== userId && (!userRole || !["SUPER_ADMIN", "ADMIN"].includes(userRole))) {
+        throw new ApiError(httpStatus.FORBIDDEN, "Product is not approved");
     }
 
     const productObj = product.toObject() as any;
@@ -266,11 +272,15 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         }
     }
 
-    // Reset approval status if updated by a seller and autoApproveProducts setting is false
+    // Reset approval status if updated by a seller
     if (!["SUPER_ADMIN", "ADMIN"].includes(userRole)) {
         const settings = await settingsServices.getSettings();
-        if (settings.autoApproveProducts === false) {
-            data.isApproved = false;
+        if (data.approvalStatus === "DRAFT") {
+            data.approvalStatus = "DRAFT";
+        } else if (settings.autoApproveProducts !== false) {
+            data.approvalStatus = "APPROVED";
+        } else {
+            data.approvalStatus = "PENDING";
         }
     }
 
@@ -323,7 +333,12 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
     return deletedProduct;
 };
 
-const approveProduct = async (id: string, isApproved: boolean, adminId: string) => {
+const approveProduct = async (
+    id: string,
+    approvalStatus: ProductApprovalStatus,
+    adminRemarks: string | undefined,
+    adminId: string
+) => {
     const product = await ProductModel.findOne({ _id: id, isDeleted: false });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
@@ -331,7 +346,7 @@ const approveProduct = async (id: string, isApproved: boolean, adminId: string) 
 
     const updatedProduct = await ProductModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
-        { $set: { isApproved } },
+        { $set: { approvalStatus, adminRemarks } },
         { new: true }
     )
         .populate("category", "name slug")
@@ -341,7 +356,7 @@ const approveProduct = async (id: string, isApproved: boolean, adminId: string) 
         activityServices.logActivity(
             adminId,
             ActivityType.PRODUCT_UPDATE,
-            `${isApproved ? "Approved" : "Rejected"} product: ${updatedProduct.name}`
+            `Updated product status to ${approvalStatus} for: ${updatedProduct.name}`
         );
     }
 

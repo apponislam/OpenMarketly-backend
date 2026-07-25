@@ -22,7 +22,7 @@ const addToCart = async (userId: string, payload: IAddToCartPayload) => {
     }
 
     // Verify product exists, is approved, and has stock
-    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true, isApproved: true });
+    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true, approvalStatus: "APPROVED" });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found or unavailable");
     }

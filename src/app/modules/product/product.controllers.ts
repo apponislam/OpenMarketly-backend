@@ -28,7 +28,7 @@ const getAllProducts = catchAsync(async (req: Request, res: Response) => {
         isFeatured: req.query.isFeatured as string | undefined,
         isTodayDeal: req.query.isTodayDeal as string | undefined,
         isTrending: req.query.isTrending as string | undefined,
-        isApproved: req.query.isApproved as string | undefined,
+        approvalStatus: req.query.approvalStatus as string | undefined,
         sellerId: req.query.sellerId as string | undefined,
         sortBy: req.query.sortBy as string | undefined,
         sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
@@ -115,15 +115,15 @@ const deleteProduct = catchAsync(async (req: Request, res: Response) => {
 
 const approveProduct = catchAsync(async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { isApproved } = req.body;
+    const { approvalStatus, adminRemarks } = req.body;
     const adminId = req.user._id;
 
-    const result = await productServices.approveProduct(id as string, isApproved, adminId);
+    const result = await productServices.approveProduct(id as string, approvalStatus, adminRemarks, adminId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: `Product ${isApproved ? "approved" : "rejected"} successfully`,
+        message: `Product status updated to ${approvalStatus} successfully`,
         data: result,
     });
 });

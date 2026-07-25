@@ -7,7 +7,7 @@ import { ActivityType } from "../activity/activity.interface";
 
 const toggleWishlist = async (userId: string, productId: string) => {
     // Verify product exists, is active, and is approved
-    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true, isApproved: true });
+    const product = await ProductModel.findOne({ _id: productId, isDeleted: false, isActive: true, approvalStatus: "APPROVED" });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }
@@ -47,7 +47,7 @@ const getMyWishlist = async (userId: string, page: number = 1, limit: number = 1
     const list = await WishlistModel.find({ user: userId })
         .populate({
             path: "product",
-            match: { isDeleted: false, isActive: true, isApproved: true },
+            match: { isDeleted: false, isActive: true, approvalStatus: "APPROVED" },
             populate: { path: "category", select: "name slug" },
         })
         .skip(skip)

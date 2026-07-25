@@ -16,6 +16,8 @@ export interface IProductSpecification {
     value: string;
 }
 
+export type ProductApprovalStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEED_EDIT';
+
 export interface IProduct {
     _id?: Types.ObjectId;
     name: string;
@@ -53,7 +55,8 @@ export interface IProduct {
     isTodayDeal?: boolean;
     isTrending?: boolean;
     isActive?: boolean;
-    isApproved?: boolean;
+    approvalStatus?: ProductApprovalStatus;
+    adminRemarks?: string;
     isDeleted?: boolean;
     createdAt?: Date;
     updatedAt?: Date;

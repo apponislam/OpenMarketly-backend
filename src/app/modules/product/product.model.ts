@@ -149,9 +149,15 @@ const productSchemaDefinition: any = {
         type: Boolean,
         default: true,
     },
-    isApproved: {
-        type: Boolean,
-        default: false,
+
+    approvalStatus: {
+        type: String,
+        enum: ["DRAFT", "PENDING", "APPROVED", "REJECTED", "NEED_EDIT"],
+        default: "PENDING",
+    },
+    adminRemarks: {
+        type: String,
+        trim: true,
     },
     isDeleted: {
         type: Boolean,
@@ -222,6 +228,6 @@ ProductSchema.index({ isFeatured: 1, isDeleted: 1 });
 ProductSchema.index({ isTodayDeal: 1, isDeleted: 1 });
 ProductSchema.index({ isTrending: 1, isDeleted: 1 });
 ProductSchema.index({ isActive: 1, isDeleted: 1 });
-ProductSchema.index({ isApproved: 1, isDeleted: 1 });
+ProductSchema.index({ approvalStatus: 1, isDeleted: 1 });
 
 export const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);
