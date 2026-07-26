@@ -122,103 +122,35 @@ export const sendEmailUpdateVerification = (email: string, name: string, verific
     sendMail(email, "Verify Your New Email", html);
 };
 
-export const sendZoomMeetingInvitation = (email: string, name: string, topic: string, meetingId: string, joinUrl: string, startTime: string) => {
+export const sendContactReplyEmail = (email: string, recipientName: string, subject: string, messageContent: string, replyMessage: string) => {
     const html = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 0; border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background-color: #ffffff;">
-            <div style="background-color: #2D8CFF; padding: 20px; text-align: center;">
-                <h1 style="color: #ffffff; margin: 0; font-size: 24px;">Zoom Meeting Invitation</h1>
-            </div>
-            <div style="padding: 30px; color: #333333; line-height: 1.6;">
-                <h2 style="color: #2D8CFF; margin-top: 0;">Hello ${name},</h2>
-                <p style="font-size: 16px;">You have been invited to join a Zoom meeting for the class: <strong>${topic}</strong>.</p>
-                
-                <div style="background-color: #f8f9fa; border-left: 4px solid #2D8CFF; padding: 15px; margin: 25px 0;">
-                    <p style="margin: 5px 0;"><strong>Topic:</strong> ${topic}</p>
-                    <p style="margin: 5px 0;"><strong>Start Time:</strong> ${new Date(startTime).toLocaleString()}</p>
-                    <p style="margin: 5px 0;"><strong>Meeting ID:</strong> ${meetingId}</p>
-                </div>
-
-                <div style="text-align: center; margin: 35px 0;">
-                    <a href="${joinUrl}" style="background-color: #2D8CFF; color: #ffffff; padding: 14px 35px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 6px rgba(45, 140, 255, 0.2);">Join Meeting</a>
-                </div>
-
-                <p style="font-size: 14px; color: #666666;">If the button doesn't work, you can copy and paste this link into your browser:</p>
-                <p style="font-size: 12px; word-break: break-all; color: #2D8CFF;">${joinUrl}</p>
-                
-                <hr style="border: 0; border-top: 1px solid #eeeeee; margin: 30px 0;">
-                <p style="font-size: 12px; color: #999999; text-align: center;">Please make sure you have Zoom installed on your device before the meeting starts.</p>
-            </div>
-            <div style="background-color: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; color: #777777;">
-                &copy; ${new Date().getFullYear()} lolfortnite650. All rights reserved.
-            </div>
-        </div>
-    `;
-    sendMail(email, `Meeting Invitation: ${topic}`, html);
-};
-
-export const sendStaffWelcomeEmail = (email: string, name: string, passwordPlain: string, restaurantName: string) => {
-    const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-            <h2 style="color: #333;">Welcome ${name}!</h2>
-            <p style="color: #666;">You have been registered as a staff member for <strong>${restaurantName}</strong>.</p>
-            <p style="color: #666;">Here are your account credentials to log in:</p>
-            <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
-                <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
-                <p style="margin: 5px 0;"><strong>Password:</strong> ${passwordPlain}</p>
-            </div>
-            <p style="color: #666;">Please change your password after logging in for security reasons.</p>
-        </div>
-    `;
-    sendMail(email, `Welcome to ${restaurantName} - Staff Account Details`, html);
-};
-
-export const sendStaffPasswordResetEmail = (email: string, name: string, passwordPlain: string, restaurantName: string) => {
-    const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-            <h2 style="color: #333;">Hello ${name},</h2>
-            <p style="color: #666;">Your password has been reset by the restaurant owner${restaurantName ? ` of <strong>${restaurantName}</strong>` : ""}.</p>
-            <p style="color: #666;">Here are your new account credentials to log in:</p>
-            <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 15px; margin: 20px 0;">
-                <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
-                <p style="margin: 5px 0;"><strong>Password:</strong> ${passwordPlain}</p>
-            </div>
-            <p style="color: #666;">Please change your password after logging in for security reasons.</p>
-        </div>
-    `;
-    sendMail(email, `Your Staff Account Password Has Been Reset`, html);
-};
-
-export const sendContactReplyEmail = (
-    email: string,
-    recipientName: string,
-    subject: string,
-    messageContent: string,
-    replyMessage: string
-) => {
-    const html = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 550px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);">
-            <div style="text-align: center; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; margin-bottom: 20px;">
-                <h2 style="color: #2d3748; margin: 0; font-size: 22px; font-weight: 700;">Bazar Hisab</h2>
-                <p style="color: #718096; margin: 5px 0 0 0; font-size: 14px;">Contact Support Response</p>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);">
+            <div style="text-align: center; border-bottom: 1px solid #edf2f7; padding-bottom: 20px; margin-bottom: 25px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Contact Support Response</p>
             </div>
             
-            <p style="color: #4a5568; font-size: 16px; line-height: 1.5; margin-top: 0;">Hello <strong>${recipientName}</strong>,</p>
-            <p style="color: #4a5568; font-size: 15px; line-height: 1.5;">This is a reply to your message regarding: <strong>"${subject}"</strong>.</p>
+            <p style="color: #1e293b; font-size: 16px; line-height: 1.5; margin-top: 0; font-weight: 600;">Hello ${recipientName},</p>
+            <p style="color: #475569; font-size: 15px; line-height: 1.5;">This is a response to your inquiry regarding: <strong>"${subject}"</strong>.</p>
             
-            <div style="background-color: #f7fafc; border-left: 4px solid #e2e8f0; padding: 12px 16px; margin: 15px 0; color: #718096; font-style: italic; font-size: 14px;">
+            <div style="background-color: #f8fafc; border-left: 4px solid #cbd5e1; padding: 16px; margin: 20px 0; color: #64748b; font-style: italic; font-size: 14px; border-radius: 4px;">
                 "${messageContent}"
             </div>
 
-            <div style="margin: 20px 0; padding: 18px; background-color: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 4px; color: #1e293b; font-size: 15px; line-height: 1.6;">
-                <h4 style="margin: 0 0 8px 0; color: #166534; font-weight: 600;">Support Reply:</h4>
+            <div style="margin: 25px 0; padding: 20px; background-color: #f0fdf4; border-left: 4px solid #22c55e; border-radius: 8px; color: #1e293b; font-size: 15px; line-height: 1.6;">
+                <h4 style="margin: 0 0 8px 0; color: #166534; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Support Team Response:</h4>
                 ${replyMessage.replace(/\n/g, "<br/>")}
             </div>
             
-            <p style="color: #a0aec0; font-size: 12px; text-align: center; margin-top: 30px; border-top: 1px solid #edf2f7; padding-top: 15px;">
-                This email was sent by Bazar Hisab Support. Please do not reply directly to this email.
-            </p>
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+                <p style="color: #94a3b8; font-size: 12px; margin: 0 0 5px 0;">
+                    This email was sent by OpenMarketly Support. Please do not reply directly to this message.
+                </p>
+                <p style="color: #cbd5e1; font-size: 11px; margin: 0;">
+                    &copy; ${new Date().getFullYear()} OpenMarketly. All rights reserved.
+                </p>
+            </div>
         </div>
     `;
-    sendMail(email, `Re: ${subject}`, html);
+    sendMail(email, `Re: ${subject} - OpenMarketly Support`, html);
 };
-
