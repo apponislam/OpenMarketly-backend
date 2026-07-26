@@ -367,6 +367,63 @@ const getOrderById = async (orderId: string, userId: string, userRole: string) =
     return order;
 };
 
+const retryPayment = async (
+    orderId: string,
+    userId: string,
+    userContext: { name: string; email: string; phone?: string }
+) => {
+    const order = await OrderModel.findById(orderId);
+    if (!order) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
+    }
+
+    if (order.user.toString() !== userId) {
+        throw new ApiError(httpStatus.FORBIDDEN, "You do not have access to this order");
+    }
+
+    if (order.paymentStatus === "PAID") {
+        throw new ApiError(httpStatus.BAD_REQUEST, "This order has already been paid");
+    }
+
+    // Verify stock levels first before retry
+    for (const item of order.items) {
+        const product = await ProductModel.findById(item.product);
+        if (!product || product.isDeleted || !product.isActive || product.approvalStatus !== "APPROVED") {
+            throw new ApiError(httpStatus.NOT_FOUND, "One or more products in this order are no longer available");
+        }
+        if (product.stockQuantity < item.quantity) {
+            throw new ApiError(httpStatus.BAD_REQUEST, `Insufficient stock for product '${product.name}'. Max available: ${product.stockQuantity}`);
+        }
+    }
+
+    // Generate unique transaction ID
+    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const transactionId = `TXN-${Date.now()}-${randomSuffix}`;
+
+    // Update order with new transaction ID and reset status
+    order.transactionId = transactionId;
+    order.paymentStatus = "PENDING";
+    order.orderStatus = "PENDING";
+    await order.save();
+
+    // Initiate payment via SSLCommerz
+    const paymentUrl = await initiateSSLCommerzPayment({
+        total_amount: order.totalPrice,
+        tran_id: transactionId,
+        cus_name: userContext.name,
+        cus_email: userContext.email,
+        cus_phone: order.shippingAddress.phone || userContext.phone || "01700000000",
+        cus_add1: order.shippingAddress.street,
+        cus_city: order.shippingAddress.city,
+        cus_postcode: order.shippingAddress.zipCode,
+        cus_country: order.shippingAddress.country,
+        product_name: "Retry Order Payment",
+        product_category: "E-Commerce",
+    });
+
+    return { order, paymentUrl };
+};
+
 export const orderServices = {
     checkoutOrder,
     directCheckoutOrder,
@@ -375,4 +432,5 @@ export const orderServices = {
     handlePaymentCancel,
     getMyOrders,
     getOrderById,
+    retryPayment,
 };

@@ -102,6 +102,25 @@ const getOrderById = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const retryPayment = catchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user._id;
+    const userContext = {
+        name: req.user.name,
+        email: req.user.email,
+        phone: req.user.phone,
+    };
+
+    const result = await orderServices.retryPayment(id as string, userId as string, userContext);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Payment re-initiated. Redirecting to payment gateway.",
+        data: result,
+    });
+});
+
 export const orderControllers = {
     checkoutOrder,
     directCheckoutOrder,
@@ -110,4 +129,5 @@ export const orderControllers = {
     paymentCancel,
     getMyOrders,
     getOrderById,
+    retryPayment,
 };

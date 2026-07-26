@@ -9,6 +9,7 @@ router.post("/checkout", auth, orderControllers.checkoutOrder);
 router.post("/direct-checkout", auth, orderControllers.directCheckoutOrder);
 router.get("/my", auth, orderControllers.getMyOrders);
 router.get("/:id", auth, orderControllers.getOrderById);
+router.post("/:id/retry-payment", auth, orderControllers.retryPayment);
 
 // SSLCommerz payment callback endpoints (Redirect target for client browser from gateway)
 router.post("/payment/success/:tranId", orderControllers.paymentSuccess);
