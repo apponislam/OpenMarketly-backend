@@ -6,10 +6,16 @@ import { activityServices } from "./activity.services";
 
 const getMyActivityLogs = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user?._id;
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
+    const query = {
+        page: req.query.page ? Number(req.query.page) : 1,
+        limit: req.query.limit ? Number(req.query.limit) : 10,
+        search: req.query.search as string | undefined,
+        action: req.query.action as string | undefined,
+        startDate: req.query.startDate as string | undefined,
+        endDate: req.query.endDate as string | undefined,
+    };
 
-    const result = await activityServices.getMyActivityLogs(userId as string, page, limit);
+    const result = await activityServices.getMyActivityLogs(userId as string, query);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -21,11 +27,17 @@ const getMyActivityLogs = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllActivityLogs = catchAsync(async (req: Request, res: Response) => {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-    const search = req.query.search as string | undefined;
+    const query = {
+        page: req.query.page ? Number(req.query.page) : 1,
+        limit: req.query.limit ? Number(req.query.limit) : 10,
+        search: req.query.search as string | undefined,
+        action: req.query.action as string | undefined,
+        userId: req.query.userId as string | undefined,
+        startDate: req.query.startDate as string | undefined,
+        endDate: req.query.endDate as string | undefined,
+    };
 
-    const result = await activityServices.getAllActivityLogs(page, limit, search);
+    const result = await activityServices.getAllActivityLogs(query);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
