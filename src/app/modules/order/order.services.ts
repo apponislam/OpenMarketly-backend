@@ -11,6 +11,7 @@ import { UserModel } from "../auth/auth.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
 import { SettingsModel } from "../settings/settings.model";
+import { notificationServices } from "../notification/notification.services";
 
 const checkoutOrder = async (userId: string, shippingAddress: IShippingAddress, userContext: { name: string; email: string; phone?: string }, couponCode?: string) => {
     if (!shippingAddress || !shippingAddress.street || !shippingAddress.city || !shippingAddress.zipCode || !shippingAddress.country || !shippingAddress.phone) {
@@ -270,12 +271,28 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
                 await UserModel.findByIdAndUpdate(product.seller, {
                     $inc: { balance: netEarnings },
                 });
+
+                // Notify seller
+                notificationServices.createNotification(
+                    product.seller.toString(),
+                    "New Order Received",
+                    `Your product "${product.name}" has been purchased (Quantity: ${item.quantity}).`,
+                    "ORDER"
+                );
             }
         }
     }
 
     // Clear user's active shopping cart
     await CartModel.findOneAndUpdate({ user: order.user }, { $set: { items: [], totalPrice: 0 } });
+
+    // Notify buyer
+    notificationServices.createNotification(
+        order.user.toString(),
+        "Order Payment Successful",
+        `Your payment of ${order.totalPrice} BDT for order #${order._id} was received.`,
+        "PAYMENT"
+    );
 
     // Log payment success
     activityServices.logActivity(order.user.toString(), ActivityType.PAYMENT_SUCCESS, `Payment succeeded for transaction ID: ${tran_id}`);
@@ -289,6 +306,14 @@ const handlePaymentFail = async (tran_id: string) => {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }
 
+    // Notify buyer
+    notificationServices.createNotification(
+        order.user.toString(),
+        "Order Payment Failed",
+        `Payment for your order with transaction ID ${tran_id} has failed.`,
+        "PAYMENT"
+    );
+
     // Log payment failure
     activityServices.logActivity(order.user.toString(), ActivityType.PAYMENT_FAIL, `Payment failed for transaction ID: ${tran_id}`);
 
@@ -300,6 +325,14 @@ const handlePaymentCancel = async (tran_id: string) => {
     if (!order) {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }
+
+    // Notify buyer
+    notificationServices.createNotification(
+        order.user.toString(),
+        "Order Payment Cancelled",
+        `Payment for your order with transaction ID ${tran_id} was cancelled.`,
+        "PAYMENT"
+    );
 
     // Log payment cancellation
     activityServices.logActivity(order.user.toString(), ActivityType.PAYMENT_FAIL, `Payment cancelled for transaction ID: ${tran_id}`);

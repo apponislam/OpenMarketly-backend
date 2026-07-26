@@ -6,6 +6,7 @@ import { WithdrawModel } from "./withdraw.model";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
 import { initiateSSLCommerzPayout } from "../order/sslcommerz.utils";
+import { notificationServices } from "../notification/notification.services";
 
 const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>) => {
     if (!data.amount || !data.paymentMethod || !data.paymentDetails?.accountNumber) {
@@ -54,6 +55,14 @@ const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>)
                 transactionId: payoutResponse.payoutRefId || payoutTxnId,
                 adminNote: payoutResponse.message || "Auto-disbursed via SSLCommerz",
             });
+
+            // Notify seller
+            notificationServices.createNotification(
+                sellerId,
+                "Withdrawal Approved",
+                `Your automatic withdrawal of ${data.amount} BDT was processed successfully.`,
+                "WITHDRAW"
+            );
 
             // Log activity
             activityServices.logActivity(
@@ -110,6 +119,14 @@ const resolveWithdrawRequest = async (
         request.adminNote = adminNote || "Rejected by admin";
         await request.save();
 
+        // Notify seller
+        notificationServices.createNotification(
+            request.seller.toString(),
+            "Withdrawal Rejected",
+            `Your withdrawal request of ${request.amount} BDT has been rejected. Reason: ${request.adminNote}`,
+            "WITHDRAW"
+        );
+
         // Log rejection
         activityServices.logActivity(
             adminUserId,
@@ -124,6 +141,14 @@ const resolveWithdrawRequest = async (
     request.status = "APPROVED";
     request.adminNote = adminNote || "Approved and disbursed by admin";
     await request.save();
+
+    // Notify seller
+    notificationServices.createNotification(
+        request.seller.toString(),
+        "Withdrawal Approved",
+        `Your withdrawal request of ${request.amount} BDT has been approved.`,
+        "WITHDRAW"
+    );
 
     // Log approval
     activityServices.logActivity(

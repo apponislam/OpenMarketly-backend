@@ -7,6 +7,7 @@ import { refundSSLCommerzPayment } from "../order/sslcommerz.utils";
 import mongoose from "mongoose";
 import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
+import { notificationServices } from "../notification/notification.services";
 
 const raiseDispute = async (userId: string, data: Partial<IDispute>) => {
     if (!data.order || !data.type || !data.reason || !data.description) {
@@ -39,6 +40,14 @@ const raiseDispute = async (userId: string, data: Partial<IDispute>) => {
     };
 
     const dispute = await DisputeModel.create(disputeData);
+
+    // Notify buyer
+    notificationServices.createNotification(
+        userId,
+        "Dispute Raised Successfully",
+        `Your dispute for order #${order._id} has been raised and is under review.`,
+        "SYSTEM"
+    );
 
     // Log dispute raised
     activityServices.logActivity(
@@ -79,6 +88,14 @@ const resolveDispute = async (
         dispute.status = "REJECTED";
         dispute.adminNote = adminNote || "Request rejected by admin";
         await dispute.save();
+
+        // Notify buyer
+        notificationServices.createNotification(
+            dispute.user.toString(),
+            "Dispute Rejected",
+            `Your dispute for order #${order._id} was rejected. Note: ${dispute.adminNote}`,
+            "SYSTEM"
+        );
 
         // Log dispute rejection
         activityServices.logActivity(
@@ -139,6 +156,14 @@ const resolveDispute = async (
     }
 
     await dispute.save();
+
+    // Notify buyer
+    notificationServices.createNotification(
+        dispute.user.toString(),
+        "Dispute Resolved",
+        `Your dispute for order #${order._id} was approved. Status: ${dispute.status}.`,
+        "SYSTEM"
+    );
 
     // Log dispute approval
     activityServices.logActivity(
