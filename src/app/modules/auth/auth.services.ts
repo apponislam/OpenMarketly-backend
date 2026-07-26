@@ -56,8 +56,7 @@ const registerUser = async (data: any) => {
 
     const createdUser = await UserModel.create(userData);
 
-    const verificationUrl = `${config.client_url}/verify-email?token=${verificationToken}&email=${createdUser.email}`;
-    sendVerificationEmail(createdUser.email as string, createdUser.name as string, verificationUrl, verificationCode);
+    sendVerificationEmail(createdUser.email as string, createdUser.name as string, verificationCode);
     sendWelcomeEmail(createdUser.email as string, createdUser.name as string);
 
     // Log registration activity
@@ -176,8 +175,7 @@ const resendVerificationEmail = async (email: string) => {
     await user.save();
 
     // Send verification email
-    const verificationUrl = `${config.client_url}/verify-email?token=${verificationToken}&email=${user.email}`;
-    sendVerificationEmail(user.email as string, user.name as string, verificationUrl, verificationCode);
+    sendVerificationEmail(user.email as string, user.name as string, verificationCode);
 
     return { message: "Verification email sent" };
 };

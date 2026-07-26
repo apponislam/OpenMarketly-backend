@@ -1,48 +1,111 @@
 import { sendMail } from "./nodemailer";
 
-export const sendVerificationEmail = (email: string, name: string, verificationUrl: string, otp?: string) => {
+export const sendVerificationEmail = (email: string, name: string, otp: string) => {
     const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-            <h2 style="color: #333;">Hello ${name},</h2>
-            <p style="color: #666;">Please verify your email address by clicking the button below:</p>
-            <div style="text-align: center; margin: 30px 0;">
-                <a href="${verificationUrl}" style="background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Verify Email</a>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Secure Verification System</p>
             </div>
-            <p style="color: #999; font-size: 12px;">Or copy this link: ${verificationUrl}</p>
-            ${
-                otp
-                    ? `<p style="color: #666; font-size: 16px; text-align: center; margin-top: 20px;">Or enter this 6-digit code in the app: <strong>${otp}</strong></p>
-                       <p style="color: #999; font-size: 12px; text-align: center;">OTP expires in 10 minutes.</p>`
-                    : ""
-            }
-            <p style="color: #999; font-size: 12px;">This link expires in 24 hours.</p>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px;">
+                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px; font-weight: 700;">Hello ${name},</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0;">
+                    Thank you for signing up with OpenMarketly! Please use the following 6-digit One-Time Password (OTP) to verify your email address and activate your account.
+                </p>
+                
+                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 25px; text-align: center; margin: 25px 0;">
+                    <div style="font-size: 38px; font-weight: 800; letter-spacing: 8px; color: #1e1b4b; text-align: center; font-family: Courier, monospace;">
+                        ${otp}
+                    </div>
+                    <p style="color: #64748b; font-size: 13px; margin: 15px 0 0 0; font-weight: 500;">
+                        This code is valid for <strong>10 minutes</strong>.
+                    </p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 25px 0 0 0;">
+                    If you did not request this verification, please ignore this email or contact support if you have security concerns.
+                </p>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+                <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                    &copy; ${new Date().getFullYear()} OpenMarketly. All rights reserved.
+                </p>
+            </div>
         </div>
     `;
-    sendMail(email, "Verify Your Email", html);
+    sendMail(email, "Verify Your Email - OpenMarketly", html);
 };
 
 export const sendOtpEmail = (email: string, otp: string, name?: string) => {
     const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-            <h2 style="color: #333;">${name ? `Hello ${name},` : "Hello,"}</h2>
-            <p style="color: #666;">Your OTP code is:</p>
-            <div style="background: #f5f5f5; padding: 15px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; border-radius: 5px;">
-                ${otp}
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 500px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">One-Time Password Verification</p>
             </div>
-            <p style="color: #999; font-size: 12px; margin-top: 20px;">This code expires in 10 minutes.</p>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px;">
+                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px; font-weight: 700;">${name ? `Hello ${name},` : "Hello,"}</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 25px 0;">
+                    We received a request to access your account. Please use the following 6-digit One-Time Password (OTP) to proceed.
+                </p>
+                
+                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 25px; text-align: center; margin: 25px 0;">
+                    <div style="font-size: 38px; font-weight: 800; letter-spacing: 8px; color: #1e1b4b; text-align: center; font-family: Courier, monospace;">
+                        ${otp}
+                    </div>
+                    <p style="color: #64748b; font-size: 13px; margin: 15px 0 0 0; font-weight: 500;">
+                        This code is valid for <strong>10 minutes</strong>.
+                    </p>
+                </div>
+                
+                <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 25px 0 0 0;">
+                    If you did not request this code, please ignore this email or update your password if you suspect unauthorized access.
+                </p>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+                <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                    &copy; ${new Date().getFullYear()} OpenMarketly. All rights reserved.
+                </p>
+            </div>
         </div>
     `;
-    sendMail(email, "Your OTP Code", html);
+    sendMail(email, "Your OTP Code - OpenMarketly", html);
 };
 
 export const sendWelcomeEmail = (email: string, name: string) => {
     const html = `
-        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 5px;">
-            <h2 style="color: #333;">Welcome ${name}!</h2>
-            <p style="color: #666;">Thank you for registering. Please verify your email to get started.</p>
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Welcome to the Platform</p>
+            </div>
+            
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px; text-align: center;">
+                <h2 style="color: #1e293b; margin: 0 0 15px 0; font-size: 22px; font-weight: 700;">Welcome to OpenMarketly, ${name}! 🎉</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                    We are absolutely thrilled to have you here. OpenMarketly is a multi-vendor platform built to give you the absolute best shopping and selling experience.
+                </p>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 30px 0;">
+                    To get started, please make sure your email is verified using the OTP code sent to you.
+                </p>
+                
+                <div style="display: inline-block; background-color: #f1f5f9; border-radius: 8px; padding: 12px 24px; color: #475569; font-size: 14px; font-weight: 500;">
+                    Let's build something great together!
+                </div>
+            </div>
+            
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f1f5f9; text-align: center;">
+                <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                    &copy; ${new Date().getFullYear()} OpenMarketly. All rights reserved.
+                </p>
+            </div>
         </div>
     `;
-    sendMail(email, "Welcome to Our Platform", html);
+    sendMail(email, "Welcome to OpenMarketly!", html);
 };
 
 export const sendEmailUpdateVerification = (email: string, name: string, verificationUrl: string) => {
