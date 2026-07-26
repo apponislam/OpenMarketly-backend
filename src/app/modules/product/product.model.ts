@@ -163,6 +163,14 @@ const productSchemaDefinition: any = {
         type: Boolean,
         default: false,
     },
+    averageRating: {
+        type: Number,
+        default: 0,
+    },
+    totalRatings: {
+        type: Number,
+        default: 0,
+    },
 };
 
 const ProductSchema = new Schema<IProduct>(productSchemaDefinition, {
@@ -234,5 +242,6 @@ ProductSchema.index({ isTodayDeal: 1, isDeleted: 1 });
 ProductSchema.index({ isTrending: 1, isDeleted: 1 });
 ProductSchema.index({ isActive: 1, isDeleted: 1 });
 ProductSchema.index({ approvalStatus: 1, isDeleted: 1 });
+ProductSchema.index({ averageRating: -1, isDeleted: 1 });
 
 export const ProductModel = mongoose.model<IProduct>("Product", ProductSchema);

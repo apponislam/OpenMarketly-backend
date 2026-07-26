@@ -58,6 +58,8 @@ export interface IProduct {
     approvalStatus?: ProductApprovalStatus;
     adminRemarks?: string;
     isDeleted?: boolean;
+    averageRating?: number;
+    totalRatings?: number;
     createdAt?: Date;
     updatedAt?: Date;
 }

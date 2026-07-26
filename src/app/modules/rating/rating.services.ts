@@ -34,6 +34,9 @@ const createOrUpdateRating = async (userId: string, data: Partial<IRating>) => {
         { new: true, upsert: true, runValidators: true }
     ).populate("user", "name profileImage");
 
+    // Recalculate and update stats on the product
+    await updateProductRatingStats(data.product);
+
     return ratingObj;
 };
 
@@ -116,7 +119,37 @@ const deleteRating = async (id: string, userId: string, userRole: string) => {
         { new: true }
     );
 
+    if (deletedRating) {
+        await updateProductRatingStats(deletedRating.product);
+    }
+
     return deletedRating;
+};
+
+const updateProductRatingStats = async (productId: string | mongoose.Types.ObjectId) => {
+    const stats = await RatingModel.aggregate([
+        { $match: { product: new mongoose.Types.ObjectId(productId), isDeleted: false } },
+        {
+            $group: {
+                _id: "$product",
+                averageRating: { $avg: "$rating" },
+                totalRatings: { $sum: 1 },
+            },
+        },
+    ]);
+
+    if (stats.length > 0) {
+        const averageRating = Math.round(stats[0].averageRating * 10) / 10;
+        const totalRatings = stats[0].totalRatings;
+
+        await ProductModel.findByIdAndUpdate(productId, {
+            $set: { averageRating, totalRatings },
+        });
+    } else {
+        await ProductModel.findByIdAndUpdate(productId, {
+            $set: { averageRating: 0, totalRatings: 0 },
+        });
+    }
 };
 
 export const ratingServices = {
