@@ -7,6 +7,9 @@ const router = Router();
 // Retrieve notifications for authenticated user
 router.get("/my", auth, notificationControllers.getMyNotifications);
 
+// Get count of notifications (unread & total) for authenticated user
+router.get("/count", auth, notificationControllers.getNotificationCount);
+
 // Mark all notifications for authenticated user as read
 router.patch("/read-all", auth, notificationControllers.markAllAsRead);
 

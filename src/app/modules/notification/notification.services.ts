@@ -4,10 +4,27 @@ import { NotificationType } from "./notification.interface";
 import ApiError from "../../../errors/ApiError";
 import httpStatus from "http-status";
 
-const getMyNotifications = async (userId: string) => {
-    return await NotificationModel.find({ user: new Types.ObjectId(userId) })
+const getMyNotifications = async (userId: string, page: number = 1, limit: number = 10) => {
+    const skip = (page - 1) * limit;
+
+    const notifications = await NotificationModel.find({ user: new Types.ObjectId(userId) })
         .sort({ createdAt: -1 })
-        .limit(100); // safety limit
+        .skip(skip)
+        .limit(limit);
+
+    const total = await NotificationModel.countDocuments({ user: new Types.ObjectId(userId) });
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
+        data: notifications,
+    };
 };
 
 const markAsRead = async (notificationId: string, userId: string) => {
@@ -46,8 +63,20 @@ const createNotification = async (
     });
 };
 
+const getNotificationCount = async (userId: string) => {
+    const unreadCount = await NotificationModel.countDocuments({
+        user: new Types.ObjectId(userId),
+        isRead: false,
+    });
+    const totalCount = await NotificationModel.countDocuments({
+        user: new Types.ObjectId(userId),
+    });
+    return { unreadCount, totalCount };
+};
+
 export const notificationServices = {
     getMyNotifications,
+    getNotificationCount,
     markAsRead,
     markAllAsRead,
     createNotification,
