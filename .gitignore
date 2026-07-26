@@ -4,3 +4,4 @@ node_modules
 uploads
 config/*.json
 doc.txt
+config/*.json
