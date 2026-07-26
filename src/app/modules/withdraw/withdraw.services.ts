@@ -1,4 +1,5 @@
 import httpStatus from "http-status";
+import mongoose from "mongoose";
 import ApiError from "../../../errors/ApiError";
 import { UserModel } from "../auth/auth.model";
 import { IWithdraw } from "./withdraw.interface";
@@ -215,9 +216,38 @@ const getAllWithdrawRequests = async (status?: string, page = 1, limit = 10) => 
     };
 };
 
+const getWithdrawStats = async (sellerId: string) => {
+    const seller = await UserModel.findById(sellerId);
+    if (!seller) {
+        throw new ApiError(httpStatus.NOT_FOUND, "Seller account not found");
+    }
+
+    const availableBalance = seller.balance || 0;
+    const sellerObjId = new mongoose.Types.ObjectId(sellerId);
+
+    const pendingStats = await WithdrawModel.aggregate([
+        { $match: { seller: sellerObjId, status: "PENDING" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const pendingCashout = pendingStats[0]?.total || 0;
+
+    const completedStats = await WithdrawModel.aggregate([
+        { $match: { seller: sellerObjId, status: "APPROVED" } },
+        { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const completedPayouts = completedStats[0]?.total || 0;
+
+    return {
+        availableBalance,
+        pendingCashout,
+        completedPayouts,
+    };
+};
+
 export const withdrawServices = {
     createWithdrawRequest,
     resolveWithdrawRequest,
     getMyWithdrawRequests,
     getAllWithdrawRequests,
+    getWithdrawStats,
 };

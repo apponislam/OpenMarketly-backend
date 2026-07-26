@@ -8,6 +8,7 @@ const router = Router();
 // Seller Routes
 router.post("/", auth, authorize(["SELLER"]), withdrawControllers.createWithdrawRequest);
 router.get("/my", auth, authorize(["SELLER"]), withdrawControllers.getMyWithdrawRequests);
+router.get("/stats", auth, authorize(["SELLER"]), withdrawControllers.getWithdrawStats);
 
 // Admin Routes
 router.get("/", auth, authorize(["SUPER_ADMIN", "ADMIN"]), withdrawControllers.getAllWithdrawRequests);

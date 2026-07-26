@@ -59,9 +59,22 @@ const getAllWithdrawRequests = catchAsync(async (req: Request, res: Response) =>
     });
 });
 
+const getWithdrawStats = catchAsync(async (req: Request, res: Response) => {
+    const sellerId = req.user?._id;
+    const result = await withdrawServices.getWithdrawStats(sellerId as string);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Withdrawal statistics retrieved successfully",
+        data: result,
+    });
+});
+
 export const withdrawControllers = {
     createWithdrawRequest,
     resolveWithdrawRequest,
     getMyWithdrawRequests,
     getAllWithdrawRequests,
+    getWithdrawStats,
 };
