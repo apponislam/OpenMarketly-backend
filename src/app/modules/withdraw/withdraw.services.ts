@@ -29,9 +29,35 @@ const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>)
     seller.balance = currentBalance - data.amount;
     await seller.save();
 
-    // Generate a unique transaction ID for SSLCommerz payout
+    // Generate a unique transaction ID for withdrawal request
     const payoutTxnId = `PO-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+    // Create the withdraw request in PENDING state first
+    const withdrawRequest = await WithdrawModel.create({
+        seller: sellerId,
+        amount: data.amount,
+        paymentMethod: data.paymentMethod,
+        paymentDetails: data.paymentDetails,
+        status: "PENDING",
+        transactionId: payoutTxnId,
+    });
+
+    // Notify seller about request submission
+    notificationServices.createNotification(
+        sellerId,
+        "Withdrawal Requested",
+        `Your withdrawal request of ${data.amount} BDT has been submitted and is pending approval.`,
+        "WITHDRAW"
+    );
+
+    // Log creation activity
+    activityServices.logActivity(
+        sellerId,
+        ActivityType.ORDER_PLACE,
+        `Created withdrawal request of ${data.amount} BDT via ${data.paymentMethod}`
+    );
+
+    // Attempt automatic SSLCommerz payout if available, but do not fail the request if auto-payout is unsupported/404
     try {
         const payoutResponse = await initiateSSLCommerzPayout({
             amount: data.amount,
@@ -45,48 +71,25 @@ const createWithdrawRequest = async (sellerId: string, data: Partial<IWithdraw>)
         });
 
         if (payoutResponse.success) {
-            // Save as APPROVED since the payment was processed successfully
-            const withdrawRequest = await WithdrawModel.create({
-                seller: sellerId,
-                amount: data.amount,
-                paymentMethod: data.paymentMethod,
-                paymentDetails: data.paymentDetails,
-                status: "APPROVED",
-                transactionId: payoutResponse.payoutRefId || payoutTxnId,
-                adminNote: payoutResponse.message || "Auto-disbursed via SSLCommerz",
-            });
+            withdrawRequest.status = "APPROVED";
+            withdrawRequest.adminNote = payoutResponse.message || "Auto-disbursed via SSLCommerz";
+            if (payoutResponse.payoutRefId) {
+                withdrawRequest.transactionId = payoutResponse.payoutRefId;
+            }
+            await withdrawRequest.save();
 
-            // Notify seller
             notificationServices.createNotification(
                 sellerId,
                 "Withdrawal Approved",
                 `Your automatic withdrawal of ${data.amount} BDT was processed successfully.`,
                 "WITHDRAW"
             );
-
-            // Log activity
-            activityServices.logActivity(
-                sellerId,
-                ActivityType.ORDER_PLACE, // generic billing activity
-                `Completed automatic withdrawal of ${data.amount} BDT via ${data.paymentMethod}`
-            );
-
-            return withdrawRequest;
-        } else {
-            // Refund balance immediately if payout failed
-            seller.balance = currentBalance;
-            await seller.save();
-
-            throw new ApiError(httpStatus.BAD_GATEWAY, `Automatic payout failed: ${payoutResponse.message}`);
         }
-    } catch (error: any) {
-        // Refund balance immediately if connection or validation error
-        seller.balance = currentBalance;
-        await seller.save();
-
-        if (error instanceof ApiError) throw error;
-        throw new ApiError(httpStatus.BAD_GATEWAY, `Automatic payout failed: ${error.message || "Unknown error"}`);
+    } catch (error) {
+        // Auto-payout endpoint unavailable or gateway returned 404 - keep request in PENDING state for admin review
     }
+
+    return withdrawRequest;
 };
 
 const resolveWithdrawRequest = async (
