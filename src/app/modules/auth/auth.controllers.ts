@@ -305,6 +305,20 @@ const changeUserRole = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const addFcmToken = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.user._id;
+    const { token } = req.body;
+
+    const result = await authServices.addFcmToken(userId as string, token as string);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "FCM token added successfully",
+        data: result,
+    });
+});
+
 export const authControllers = {
     register,
 
@@ -328,4 +342,5 @@ export const authControllers = {
     deleteAccount,
     deleteUserByAdmin,
     changeUserRole,
+    addFcmToken,
 };

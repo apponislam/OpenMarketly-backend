@@ -24,6 +24,7 @@ router.post("/update-email", auth, authControllers.updateEmail);
 router.get("/verify-new-email", authControllers.verifyNewEmail);
 router.post("/resend-email-update", auth, authControllers.resendEmailUpdate);
 router.delete("/me", auth, authControllers.deleteAccount);
+router.patch("/fcm-token", auth, authControllers.addFcmToken);
 
 // Admin only routes
 router.post("/set-password/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), authControllers.setUserPassword);

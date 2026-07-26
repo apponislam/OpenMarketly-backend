@@ -28,7 +28,7 @@ const sendPushNotification = async (tokens: string[], title: string, body: strin
         };
 
         try {
-            const response = await getMessaging().sendEachForMulticast(message);
+            const response = await getMessaging().sendMulticast(message);
             console.log(`[NOTIFICATION] Success: ${response.successCount} sent, ${response.failureCount} failed.`);
 
             // Clean up failed tokens if userId is provided

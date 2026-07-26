@@ -448,6 +448,24 @@ const changeUserRole = async (userId: string, role: UserRole) => {
     return user;
 };
 
+const addFcmToken = async (userId: string, token: string) => {
+    if (!token) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Token is required");
+    }
+
+    const user = await UserModel.findOneAndUpdate(
+        { _id: userId, isDeleted: false },
+        { $addToSet: { fcmTokens: token } },
+        { new: true }
+    ).select("-password");
+
+    if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+    }
+
+    return user;
+};
+
 export const authServices = {
     registerUser,
     loginUser,
@@ -467,4 +485,5 @@ export const authServices = {
     setUserPassword,
     deleteUser,
     changeUserRole,
+    addFcmToken,
 };

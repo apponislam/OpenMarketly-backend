@@ -104,6 +104,11 @@ const userSchemaDefinition: any = {
     pendingEmail: String,
     emailVerificationToken: String,
     emailVerificationExpiry: Date,
+
+    fcmTokens: {
+        type: [String],
+        default: [],
+    },
 };
 
 const UserSchema = new Schema<User>(userSchemaDefinition, {

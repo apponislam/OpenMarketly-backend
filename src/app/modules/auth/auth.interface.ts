@@ -49,6 +49,8 @@ export interface User {
     emailVerificationToken?: string;
     emailVerificationExpiry?: Date;
 
+    fcmTokens?: string[];
+
     createdAt: Date;
     updatedAt: Date;
 }
