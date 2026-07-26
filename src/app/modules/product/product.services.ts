@@ -57,11 +57,7 @@ const createProduct = async (sellerId: string, data: Partial<IProduct>) => {
     const product = await ProductModel.create(productData);
 
     // Log product creation activity
-    activityServices.logActivity(
-        sellerId,
-        ActivityType.PRODUCT_CREATE,
-        `Created a new product: ${product.name} (SKU: ${product.sku})`
-    );
+    activityServices.logActivity(sellerId, ActivityType.PRODUCT_CREATE, `Created a new product: ${product.name} (SKU: ${product.sku})`);
 
     return await product.populate([
         { path: "category", select: "name slug" },
@@ -81,12 +77,7 @@ const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: 
     }
 
     if (query.search) {
-        filter.$or = [
-            { name: { $regex: query.search, $options: "i" } },
-            { description: { $regex: query.search, $options: "i" } },
-            { brand: { $regex: query.search, $options: "i" } },
-            { tags: { $in: [new RegExp(query.search, "i")] } },
-        ];
+        filter.$or = [{ name: { $regex: query.search, $options: "i" } }, { description: { $regex: query.search, $options: "i" } }, { brand: { $regex: query.search, $options: "i" } }, { tags: { $in: [new RegExp(query.search, "i")] } }];
     }
 
     if (query.category) {
@@ -114,18 +105,12 @@ const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: 
 
     if (query.color) {
         filter.$or = filter.$or || [];
-        filter.$or.push(
-            { colors: { $in: [new RegExp(query.color, "i")] } },
-            { "variants.color": { $regex: query.color, $options: "i" } }
-        );
+        filter.$or.push({ colors: { $in: [new RegExp(query.color, "i")] } }, { "variants.color": { $regex: query.color, $options: "i" } });
     }
 
     if (query.size) {
         filter.$or = filter.$or || [];
-        filter.$or.push(
-            { sizes: { $in: [new RegExp(query.size, "i")] } },
-            { "variants.size": { $regex: query.size, $options: "i" } }
-        );
+        filter.$or.push({ sizes: { $in: [new RegExp(query.size, "i")] } }, { "variants.size": { $regex: query.size, $options: "i" } });
     }
 
     if (query.sellerId) {
@@ -161,12 +146,7 @@ const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: 
         sort.createdAt = -1;
     }
 
-    const products = await ProductModel.find(filter)
-        .populate("category", "name slug")
-        .populate("seller", "name email profileImage")
-        .sort(sort)
-        .skip(skip)
-        .limit(limit);
+    const products = await ProductModel.find(filter).populate("category", "name slug").populate("seller", "name email profileImage").sort(sort).skip(skip).limit(limit);
 
     const total = await ProductModel.countDocuments(filter);
 
@@ -199,9 +179,7 @@ const getAllProducts = async (query: IProductQuery, userId?: string, userRole?: 
 };
 
 const getProductById = async (id: string, userId?: string, userRole?: string) => {
-    const product = await ProductModel.findOne({ _id: id, isDeleted: false })
-        .populate("category", "name slug description")
-        .populate("seller", "name email phone profileImage");
+    const product = await ProductModel.findOne({ _id: id, isDeleted: false }).populate("category", "name slug description").populate("seller", "name email phone profileImage");
 
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
@@ -224,9 +202,7 @@ const getProductById = async (id: string, userId?: string, userRole?: string) =>
 };
 
 const getProductBySlug = async (slug: string, userId?: string, userRole?: string) => {
-    const product = await ProductModel.findOne({ slug, isDeleted: false })
-        .populate("category", "name slug description")
-        .populate("seller", "name email phone profileImage");
+    const product = await ProductModel.findOne({ slug, isDeleted: false }).populate("category", "name slug description").populate("seller", "name email phone profileImage");
 
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
@@ -249,9 +225,7 @@ const getProductBySlug = async (slug: string, userId?: string, userRole?: string
 };
 
 const getMyProducts = async (sellerId: string) => {
-    return await ProductModel.find({ seller: sellerId, isDeleted: false })
-        .populate("category", "name slug")
-        .sort({ createdAt: -1 });
+    return await ProductModel.find({ seller: sellerId, isDeleted: false }).populate("category", "name slug").sort({ createdAt: -1 });
 };
 
 const updateProduct = async (id: string, sellerId: string, userRole: string, data: Partial<IProduct>) => {
@@ -290,21 +264,11 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         delete (data as any).removeImages;
     }
 
-    const updatedProduct = await ProductModel.findOneAndUpdate(
-        { _id: id, isDeleted: false },
-        updateQuery,
-        { new: true, runValidators: true }
-    )
-        .populate("category", "name slug")
-        .populate("seller", "name email profileImage");
+    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, updateQuery, { new: true, runValidators: true }).populate("category", "name slug").populate("seller", "name email profileImage");
 
     if (updatedProduct) {
         // Log product update activity
-        activityServices.logActivity(
-            sellerId,
-            ActivityType.PRODUCT_UPDATE,
-            `Updated product details for: ${updatedProduct.name}`
-        );
+        activityServices.logActivity(sellerId, ActivityType.PRODUCT_UPDATE, `Updated product details for: ${updatedProduct.name}`);
     }
 
     return updatedProduct;
@@ -321,49 +285,26 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to delete this product");
     }
 
-    const deletedProduct = await ProductModel.findOneAndUpdate(
-        { _id: id, isDeleted: false },
-        { $set: { isDeleted: true } },
-        { new: true }
-    );
+    const deletedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { isDeleted: true } }, { new: true });
 
     if (deletedProduct) {
         // Log product deletion activity
-        activityServices.logActivity(
-            sellerId,
-            ActivityType.PRODUCT_DELETE,
-            `Deleted product: ${deletedProduct.name}`
-        );
+        activityServices.logActivity(sellerId, ActivityType.PRODUCT_DELETE, `Deleted product: ${deletedProduct.name}`);
     }
 
     return deletedProduct;
 };
 
-const approveProduct = async (
-    id: string,
-    approvalStatus: ProductApprovalStatus,
-    adminRemarks: string | undefined,
-    adminId: string
-) => {
+const approveProduct = async (id: string, approvalStatus: ProductApprovalStatus, adminRemarks: string | undefined, adminId: string) => {
     const product = await ProductModel.findOne({ _id: id, isDeleted: false });
     if (!product) {
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }
 
-    const updatedProduct = await ProductModel.findOneAndUpdate(
-        { _id: id, isDeleted: false },
-        { $set: { approvalStatus, adminRemarks } },
-        { new: true }
-    )
-        .populate("category", "name slug")
-        .populate("seller", "name email profileImage");
+    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { approvalStatus, adminRemarks } }, { new: true }).populate("category", "name slug").populate("seller", "name email profileImage");
 
     if (updatedProduct) {
-        activityServices.logActivity(
-            adminId,
-            ActivityType.PRODUCT_UPDATE,
-            `Updated product status to ${approvalStatus} for: ${updatedProduct.name}`
-        );
+        activityServices.logActivity(adminId, ActivityType.PRODUCT_UPDATE, `Updated product status to ${approvalStatus} for: ${updatedProduct.name}`);
     }
 
     return updatedProduct;

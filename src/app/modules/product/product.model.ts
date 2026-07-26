@@ -220,6 +220,11 @@ ProductSchema.pre("save", function () {
 
 // Indexes for high performance search, filter and pagination
 ProductSchema.index({ name: "text", description: "text", brand: "text", tags: "text" });
+ProductSchema.index({ name: 1 });
+ProductSchema.index({ description: 1 });
+ProductSchema.index({ tags: 1 });
+ProductSchema.index({ isDeleted: 1, isActive: 1, approvalStatus: 1, category: 1, price: 1 });
+ProductSchema.index({ isDeleted: 1, isActive: 1, approvalStatus: 1, seller: 1 });
 ProductSchema.index({ category: 1, isDeleted: 1 });
 ProductSchema.index({ seller: 1, isDeleted: 1 });
 ProductSchema.index({ brand: 1, isDeleted: 1 });
