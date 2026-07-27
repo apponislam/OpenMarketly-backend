@@ -204,14 +204,16 @@ const getAllUsers = async (query: Record<string, any>) => {
         .limit(limit);
 
     const total = await UserModel.countDocuments(whereConditions);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
         meta: {
             page,
             limit,
             total,
-            totalPage,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
         },
         data: users,
     };
@@ -249,10 +251,17 @@ const getUserProducts = async (userId: string, query: Record<string, any>) => {
         .limit(limit);
 
     const total = await ProductModel.countDocuments(filter);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
-        meta: { page, limit, total, totalPage },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
         data: products,
     };
 };
@@ -279,10 +288,17 @@ const getUserOrders = async (userId: string, query: Record<string, any>) => {
         .limit(limit);
 
     const total = await OrderModel.countDocuments(filter);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
-        meta: { page, limit, total, totalPage },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
         data: orders,
     };
 };
@@ -308,10 +324,17 @@ const getUserActivities = async (userId: string, query: Record<string, any>) => 
         .limit(limit);
 
     const total = await ActivityLogModel.countDocuments(filter);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
-        meta: { page, limit, total, totalPage },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
         data: activities,
     };
 };
@@ -337,10 +360,17 @@ const getUserNotifications = async (userId: string, query: Record<string, any>) 
         .limit(limit);
 
     const total = await NotificationModel.countDocuments(filter);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
-        meta: { page, limit, total, totalPage },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
         data: notifications,
     };
 };
@@ -367,10 +397,17 @@ const getUserRatings = async (userId: string, query: Record<string, any>) => {
         .limit(limit);
 
     const total = await RatingModel.countDocuments(filter);
-    const totalPage = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / limit);
 
     return {
-        meta: { page, limit, total, totalPage },
+        meta: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page * limit < total,
+            hasPrev: page > 1,
+        },
         data: ratings,
     };
 };
