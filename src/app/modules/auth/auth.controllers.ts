@@ -205,6 +205,17 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
+const changePassword = catchAsync(async (req: Request, res: Response) => {
+    await authServices.changePassword(req.user._id, req.body.currentPassword, req.body.newPassword);
+
+    sendResponse(res, {
+        statusCode: httpStatus.OK,
+        success: true,
+        message: "Password changed successfully",
+        data: null,
+    });
+});
+
 const updateEmail = catchAsync(async (req: Request, res: Response) => {
     await authServices.updateEmail(req.user._id, req.body.email, req.body.password);
 
@@ -235,19 +246,6 @@ const verifyNewEmail = catchAsync(async (req: Request, res: Response) => {
         statusCode: httpStatus.OK,
         success: true,
         message: "New email verified successfully",
-        data: null,
-    });
-});
-
-const setUserPassword = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.params.userId as string;
-    const { password } = req.body;
-    await authServices.setUserPassword(userId, password);
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Password set successfully",
         data: null,
     });
 });
@@ -304,10 +302,10 @@ export const authControllers = {
     resendOtp,
     resetPassword,
     updateProfile,
+    changePassword,
     updateEmail,
     resendEmailUpdate,
     verifyNewEmail,
-    setUserPassword,
     deleteAccount,
     deleteUserByAdmin,
     addFcmToken,

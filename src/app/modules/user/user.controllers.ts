@@ -32,16 +32,20 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const changePassword = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user._id;
-    const { currentPassword, newPassword } = req.body;
+const setUserPassword = catchAsync(async (req: Request, res: Response) => {
+    const userId = req.params.userId as string;
+    const { password } = req.body;
 
-    await userServices.changePassword(userId, currentPassword, newPassword);
+    if (!password) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Password is required");
+    }
+
+    await userServices.setUserPassword(userId, password);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
         success: true,
-        message: "Password changed successfully",
+        message: "User password set successfully",
         data: null,
     });
 });
@@ -156,7 +160,7 @@ const getUserRatings = catchAsync(async (req: Request, res: Response) => {
 export const userControllers = {
     getUserStats,
     createAdmin,
-    changePassword,
+    setUserPassword,
     changeUserRole,
     getAllUsers,
     getSingleUser,

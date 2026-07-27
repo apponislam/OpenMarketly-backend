@@ -305,6 +305,21 @@ const updateProfile = async (userId: string, data: any) => {
     return user;
 };
 
+const changePassword = async (userId: string, currentPassword: string, newPassword: string) => {
+    const user = await UserModel.findOne({ _id: userId, isDeleted: false });
+    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password as string);
+    if (!isPasswordValid) throw new ApiError(httpStatus.BAD_REQUEST, "Incorrect current password");
+
+    const hashedPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
+    user.password = hashedPassword;
+    await user.save();
+
+    // Log password change activity
+    activityServices.logActivity(userId, ActivityType.PASSWORD_CHANGE, "Changed password via account settings");
+};
+
 const updateEmail = async (userId: string, newEmail: string, password: string) => {
     const user = await UserModel.findOne({ _id: userId, isDeleted: false });
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
@@ -418,10 +433,10 @@ export const authServices = {
     resendOtp,
     resetPassword,
     updateProfile,
+    changePassword,
     updateEmail,
     resendEmailUpdate,
     verifyNewEmail,
-    setUserPassword,
     deleteUser,
     addFcmToken,
 };

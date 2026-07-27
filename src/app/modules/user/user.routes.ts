@@ -11,8 +11,8 @@ router.get("/stats", auth, authorize(["SUPER_ADMIN", "ADMIN"]), userControllers.
 // Create Admin (Super Admin only)
 router.post("/create-admin", auth, authorize(["SUPER_ADMIN"]), userControllers.createAdmin);
 
-// Change Password (Authenticated user)
-router.post("/change-password", auth, userControllers.changePassword);
+// Admin / Super Admin set user password
+router.post("/set-password/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), userControllers.setUserPassword);
 
 // Change User Role (Super Admin only)
 router.patch("/change-role/:userId", auth, authorize(["SUPER_ADMIN"]), userControllers.changeUserRole);

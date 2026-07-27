@@ -153,6 +153,7 @@ UserSchema.pre("save", async function () {
 UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ email: 1, isDeleted: 1 });
 UserSchema.index({ name: 1, isDeleted: 1 });
+UserSchema.index({ isDeleted: 1, role: 1, isActive: 1 });
 UserSchema.index({ role: 1, isDeleted: 1 });
 UserSchema.index({ isActive: 1, isDeleted: 1 });
 UserSchema.index({ isEmailVerified: 1, isDeleted: 1 });

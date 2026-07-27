@@ -11,43 +11,38 @@ import { NotificationModel } from "../notification/notification.model";
 import { RatingModel } from "../rating/rating.model";
 import { UserRole } from "../auth/auth.interface";
 
-// 1. User stats with each role
+// 1. Direct aggregate counting totalUsers, totalCustomers, totalSellers, totalAdmins
 const getUserStats = async () => {
     const stats = await UserModel.aggregate([
         { $match: { isDeleted: false } },
         {
             $group: {
-                _id: "$role",
-                count: { $sum: 1 },
-                activeCount: { $sum: { $cond: [{ $eq: ["$isActive", true] }, 1, 0] } },
-                inactiveCount: { $sum: { $cond: [{ $eq: ["$isActive", false] }, 1, 0] } },
-                emailVerifiedCount: { $sum: { $cond: [{ $eq: ["$isEmailVerified", true] }, 1, 0] } },
+                _id: null,
+                totalUsers: { $sum: 1 },
+                totalCustomers: { $sum: { $cond: [{ $eq: ["$role", "CUSTOMER"] }, 1, 0] } },
+                totalSellers: { $sum: { $cond: [{ $eq: ["$role", "SELLER"] }, 1, 0] } },
+                totalAdmins: { $sum: { $cond: [{ $eq: ["$role", "ADMIN"] }, 1, 0] } },
+            },
+        },
+        {
+            $project: {
+                _id: 0,
+                totalUsers: 1,
+                totalCustomers: 1,
+                totalSellers: 1,
+                totalAdmins: 1,
             },
         },
     ]);
 
-    const formattedStats: Record<string, any> = {
-        totalUsers: 0,
-        SUPER_ADMIN: { count: 0, activeCount: 0, inactiveCount: 0, emailVerifiedCount: 0 },
-        ADMIN: { count: 0, activeCount: 0, inactiveCount: 0, emailVerifiedCount: 0 },
-        SELLER: { count: 0, activeCount: 0, inactiveCount: 0, emailVerifiedCount: 0 },
-        CUSTOMER: { count: 0, activeCount: 0, inactiveCount: 0, emailVerifiedCount: 0 },
-    };
-
-    stats.forEach((item) => {
-        const role = item._id as string;
-        if (formattedStats[role] && typeof formattedStats[role] === "object") {
-            formattedStats[role] = {
-                count: item.count,
-                activeCount: item.activeCount,
-                inactiveCount: item.inactiveCount,
-                emailVerifiedCount: item.emailVerifiedCount,
-            };
-            formattedStats.totalUsers += item.count;
+    return (
+        stats[0] || {
+            totalUsers: 0,
+            totalCustomers: 0,
+            totalSellers: 0,
+            totalAdmins: 0,
         }
-    });
-
-    return formattedStats;
+    );
 };
 
 // 2. Create Admin (Super Admin only)
@@ -84,20 +79,15 @@ const createAdmin = async (payload: {
     return userObj;
 };
 
-// 3. Change password
-const changePassword = async (userId: string, currentPassword?: string, newPassword?: string) => {
-    if (!currentPassword || !newPassword) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Current password and new password are required");
+// 3. Set password for a user (Admin/Super Admin)
+const setUserPassword = async (targetUserId: string, newPassword?: string) => {
+    if (!newPassword) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Password is required");
     }
 
-    const user = await UserModel.findById(userId).select("+password");
-    if (!user) {
+    const user = await UserModel.findById(targetUserId);
+    if (!user || user.isDeleted) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-    }
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Current password is incorrect");
     }
 
     user.password = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
@@ -344,7 +334,7 @@ const getUserRatings = async (userId: string, query: Record<string, any>) => {
 export const userServices = {
     getUserStats,
     createAdmin,
-    changePassword,
+    setUserPassword,
     changeUserRole,
     getAllUsers,
     getSingleUser,
