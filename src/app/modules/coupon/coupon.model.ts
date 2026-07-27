@@ -8,6 +8,8 @@ const couponSchemaDefinition: any = {
         unique: true,
         trim: true,
         uppercase: true,
+        maxlength: [30, "Coupon code cannot exceed 30 characters"],
+        match: [/^[A-Z0-9_-]+$/, "Coupon code can only contain letters, numbers, hyphens and underscores (no spaces)"],
     },
     discountType: {
         type: String,

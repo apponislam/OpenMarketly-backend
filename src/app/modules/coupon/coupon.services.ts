@@ -6,11 +6,31 @@ import { activityServices } from "../activity/activity.services";
 import { ActivityType } from "../activity/activity.interface";
 
 const createCoupon = async (data: Partial<ICoupon>, userId: string) => {
-    if (!data.code || !data.discountType || data.discountValue === undefined || !data.expiryDate) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Code, discountType, discountValue, and expiryDate are required");
+    if (!data.code || typeof data.code !== "string") {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Coupon code is required");
+    }
+    if (!data.discountType || !["PERCENTAGE", "FIXED"].includes(data.discountType)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Discount type must be either PERCENTAGE or FIXED");
+    }
+    if (data.discountValue === undefined || typeof data.discountValue !== "number" || data.discountValue < 0) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Discount value is required and must be a positive number");
+    }
+    if (data.discountType === "PERCENTAGE" && data.discountValue > 100) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Percentage discount cannot exceed 100%");
+    }
+    if (!data.expiryDate) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Expiry date is required");
+    }
+    if (new Date(data.expiryDate) <= new Date()) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Expiry date must be in the future");
     }
 
-    const uppercaseCode = data.code.toUpperCase().trim();
+    const uppercaseCode = data.code.toUpperCase().trim().replace(/\s+/g, "");
+    if (!/^[A-Z0-9_-]+$/.test(uppercaseCode)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Coupon code can only contain letters, numbers, hyphens and underscores");
+    }
+    data.code = uppercaseCode;
+
     const existing = await CouponModel.findOne({ code: uppercaseCode, isDeleted: false });
     if (existing) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Coupon code already exists");
