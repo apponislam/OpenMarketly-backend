@@ -22,7 +22,8 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Name, email, and password are required");
     }
 
-    const result = await userServices.createAdmin(req.body);
+    const performerId = req.user._id;
+    const result = await userServices.createAdmin(req.body, performerId);
 
     sendResponse(res, {
         statusCode: httpStatus.CREATED,
@@ -40,7 +41,8 @@ const setUserPassword = catchAsync(async (req: Request, res: Response) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Password is required");
     }
 
-    await userServices.setUserPassword(userId, password);
+    const performerId = req.user._id;
+    await userServices.setUserPassword(userId, password, performerId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
@@ -58,7 +60,8 @@ const changeUserRole = catchAsync(async (req: Request, res: Response) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Role is required");
     }
 
-    const result = await userServices.changeUserRole(userId as string, role);
+    const performerId = req.user._id;
+    const result = await userServices.changeUserRole(userId as string, role, performerId);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,

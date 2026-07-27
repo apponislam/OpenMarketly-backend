@@ -154,3 +154,67 @@ export const sendContactReplyEmail = (email: string, recipientName: string, subj
     `;
     sendMail(email, `Re: ${subject} - OpenMarketly Support`, html);
 };
+
+export const sendAdminCreatedEmail = (email: string, name: string, tempPassword: string) => {
+    const html = `
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Administrator Account Access</p>
+            </div>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px;">
+                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px; font-weight: 700;">Hello ${name},</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                    An administrator account has been created for you on OpenMarketly. Below are your login credentials:
+                </p>
+                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                    <p style="margin: 0 0 8px 0; color: #334155; font-size: 14px;"><strong>Email:</strong> ${email}</p>
+                    <p style="margin: 0; color: #334155; font-size: 14px;"><strong>Password:</strong> <span style="font-family: monospace; font-size: 16px; color: #6366f1;">${tempPassword}</span></p>
+                </div>
+                <p style="color: #64748b; font-size: 13px;">Please log in and change your password immediately for security purposes.</p>
+            </div>
+        </div>
+    `;
+    sendMail(email, "Your Administrator Account Credentials - OpenMarketly", html);
+};
+
+export const sendPasswordUpdatedByAdminEmail = (email: string, name: string, newPassword: string) => {
+    const html = `
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Security Notice</p>
+            </div>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px;">
+                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px; font-weight: 700;">Hello ${name},</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Your account password has been reset by a system administrator. Below is your new password:
+                </p>
+                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin: 20px 0; text-align: center;">
+                    <span style="font-family: monospace; font-size: 20px; font-weight: 700; color: #1e1b4b;">${newPassword}</span>
+                </div>
+                <p style="color: #64748b; font-size: 13px;">If you did not request this password change, please contact platform support immediately.</p>
+            </div>
+        </div>
+    `;
+    sendMail(email, "Your Password Has Been Updated - OpenMarketly", html);
+};
+
+export const sendRoleChangedEmail = (email: string, name: string, newRole: string) => {
+    const html = `
+        <div style="font-family: 'Inter', system-ui, -apple-system, sans-serif; max-width: 550px; margin: 0 auto; padding: 40px 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff;">
+            <div style="text-align: center; margin-bottom: 30px;">
+                <h1 style="color: #6366f1; margin: 0; font-size: 28px; font-weight: 800;">OpenMarketly</h1>
+                <p style="color: #64748b; margin: 4px 0 0 0; font-size: 14px;">Account Privilege Notice</p>
+            </div>
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 25px;">
+                <h2 style="color: #1e293b; margin: 0 0 10px 0; font-size: 20px; font-weight: 700;">Hello ${name},</h2>
+                <p style="color: #475569; font-size: 15px; line-height: 1.6; margin: 0 0 20px 0;">
+                    Your account role on OpenMarketly has been updated to <strong>${newRole}</strong>.
+                </p>
+                <p style="color: #64748b; font-size: 13px;">Your permissions have been adjusted accordingly. Please re-log into your account to access your updated workspace features.</p>
+            </div>
+        </div>
+    `;
+    sendMail(email, "Your Account Role Has Changed - OpenMarketly", html);
+};

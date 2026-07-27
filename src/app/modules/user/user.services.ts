@@ -11,6 +11,10 @@ import { NotificationModel } from "../notification/notification.model";
 import { RatingModel } from "../rating/rating.model";
 import { UserRole } from "../auth/auth.interface";
 
+import { sendAdminCreatedEmail, sendPasswordUpdatedByAdminEmail, sendRoleChangedEmail } from "../../../utils/emailTemplates";
+import { activityServices } from "../activity/activity.services";
+import { ActivityType } from "../activity/activity.interface";
+
 // 1. Direct aggregate counting totalUsers, totalCustomers, totalSellers, totalAdmins
 const getUserStats = async () => {
     const stats = await UserModel.aggregate([
@@ -46,14 +50,17 @@ const getUserStats = async () => {
 };
 
 // 2. Create Admin (Super Admin only)
-const createAdmin = async (payload: {
-    name: string;
-    email: string;
-    password: string;
-    gender?: string;
-    phone?: string;
-    profileImage?: string;
-}) => {
+const createAdmin = async (
+    payload: {
+        name: string;
+        email: string;
+        password: string;
+        gender?: string;
+        phone?: string;
+        profileImage?: string;
+    },
+    performerId?: string,
+) => {
     const existingUser = await UserModel.findOne({ email: payload.email.toLowerCase() });
     if (existingUser) {
         throw new ApiError(httpStatus.BAD_REQUEST, "User with this email already exists");
@@ -73,6 +80,18 @@ const createAdmin = async (payload: {
         isEmailVerified: true,
     });
 
+    // Send notification email with initial credentials
+    sendAdminCreatedEmail(adminUser.email, adminUser.name, payload.password);
+
+    // Log Activity
+    if (performerId) {
+        activityServices.logActivity(
+            performerId,
+            ActivityType.SETTINGS_UPDATE,
+            `Created new admin account for ${adminUser.email}`,
+        );
+    }
+
     const userObj = (adminUser as any).toObject ? (adminUser as any).toObject() : adminUser;
     delete userObj.password;
 
@@ -80,7 +99,7 @@ const createAdmin = async (payload: {
 };
 
 // 3. Set password for a user (Admin/Super Admin)
-const setUserPassword = async (targetUserId: string, newPassword?: string) => {
+const setUserPassword = async (targetUserId: string, newPassword?: string, performerId?: string) => {
     if (!newPassword) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Password is required");
     }
@@ -93,11 +112,23 @@ const setUserPassword = async (targetUserId: string, newPassword?: string) => {
     user.password = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
     await user.save();
 
+    // Send notification email to user
+    sendPasswordUpdatedByAdminEmail(user.email, user.name, newPassword);
+
+    // Log Activity
+    if (performerId) {
+        activityServices.logActivity(
+            performerId,
+            ActivityType.PASSWORD_CHANGE,
+            `Updated password for user ${user.email}`,
+        );
+    }
+
     return null;
 };
 
 // 4. Change role (Super Admin only)
-const changeUserRole = async (targetUserId: string, newRole: UserRole) => {
+const changeUserRole = async (targetUserId: string, newRole: UserRole, performerId?: string) => {
     const validRoles: UserRole[] = ["SUPER_ADMIN", "ADMIN", "SELLER", "CUSTOMER"];
     if (!validRoles.includes(newRole)) {
         throw new ApiError(httpStatus.BAD_REQUEST, `Invalid role: ${newRole}`);
@@ -108,8 +139,21 @@ const changeUserRole = async (targetUserId: string, newRole: UserRole) => {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
     }
 
+    const oldRole = user.role;
     user.role = newRole;
     await user.save();
+
+    // Send notification email to user
+    sendRoleChangedEmail(user.email, user.name, newRole);
+
+    // Log Activity
+    if (performerId) {
+        activityServices.logActivity(
+            performerId,
+            ActivityType.PROFILE_UPDATE,
+            `Changed role of user ${user.email} from ${oldRole} to ${newRole}`,
+        );
+    }
 
     const userObj = user.toObject() as any;
     delete userObj.password;
