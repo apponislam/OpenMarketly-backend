@@ -10,7 +10,7 @@ const trackVisit = catchAsync(async (req: Request, res: Response) => {
     const ipAddress = Array.isArray(rawIp) ? rawIp[0] : (rawIp as string).split(",")[0].trim();
     const userAgent = req.headers["user-agent"] || "";
     const path = req.body.path || req.headers["referer"] || "/";
-    const userId = (req as any).user?._id || req.body.userId;
+    const userId = (req as any).user?._id;
 
     // Detect or read platform (WEB, APP, ANDROID, IOS)
     let platform: VisitorPlatform = "WEB";
