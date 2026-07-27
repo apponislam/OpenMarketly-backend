@@ -205,17 +205,6 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const changePassword = catchAsync(async (req: Request, res: Response) => {
-    await authServices.changePassword(req.user._id, req.body.currentPassword, req.body.newPassword);
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "Password changed successfully",
-        data: null,
-    });
-});
-
 const updateEmail = catchAsync(async (req: Request, res: Response) => {
     await authServices.updateEmail(req.user._id, req.body.email, req.body.password);
 
@@ -263,9 +252,6 @@ const setUserPassword = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-
-
-
 const deleteAccount = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user._id;
     await authServices.deleteUser(userId.toString());
@@ -291,20 +277,6 @@ const deleteUserByAdmin = catchAsync(async (req: Request, res: Response) => {
     });
 });
 
-const changeUserRole = catchAsync(async (req: Request, res: Response) => {
-    const { userId } = req.params;
-    const { role } = req.body;
-
-    const result = await authServices.changeUserRole(userId as string, role);
-
-    sendResponse(res, {
-        statusCode: httpStatus.OK,
-        success: true,
-        message: "User role updated successfully",
-        data: result,
-    });
-});
-
 const addFcmToken = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user._id;
     const { token } = req.body;
@@ -321,7 +293,6 @@ const addFcmToken = catchAsync(async (req: Request, res: Response) => {
 
 export const authControllers = {
     register,
-
     login,
     verifyEmail,
     resendVerificationEmail,
@@ -333,14 +304,11 @@ export const authControllers = {
     resendOtp,
     resetPassword,
     updateProfile,
-
-    changePassword,
     updateEmail,
     resendEmailUpdate,
     verifyNewEmail,
     setUserPassword,
     deleteAccount,
     deleteUserByAdmin,
-    changeUserRole,
     addFcmToken,
 };

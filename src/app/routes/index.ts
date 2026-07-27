@@ -21,10 +21,15 @@ import { activityRoutes } from "../modules/activity/activity.routes";
 import { withdrawRoutes } from "../modules/withdraw/withdraw.routes";
 import { dashboardRoutes } from "../modules/dashboard/dashboard.routes";
 import { notificationRoutes } from "../modules/notification/notification.routes";
+import { userRoutes } from "../modules/user/user.routes";
 
 const router = express.Router();
 
 const moduleRoutes = [
+    {
+        path: "/users",
+        route: userRoutes,
+    },
     {
         path: "/auth",
         route: authRoutes,

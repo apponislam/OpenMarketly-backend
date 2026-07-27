@@ -60,11 +60,7 @@ const registerUser = async (data: any) => {
     sendWelcomeEmail(createdUser.email as string, createdUser.name as string);
 
     // Log registration activity
-    activityServices.logActivity(
-        createdUser._id.toString(),
-        ActivityType.REGISTER,
-        `Registered a new account with email ${createdUser.email}`
-    );
+    activityServices.logActivity(createdUser._id.toString(), ActivityType.REGISTER, `Registered a new account with email ${createdUser.email}`);
 
     // Generate tokens
     const jwtPayload = {
@@ -101,11 +97,7 @@ const loginUser = async (data: { email: string; password: string }) => {
     await UserModel.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
 
     // Log login activity
-    activityServices.logActivity(
-        user._id.toString(),
-        ActivityType.LOGIN,
-        `Logged in successfully`
-    );
+    activityServices.logActivity(user._id.toString(), ActivityType.LOGIN, `Logged in successfully`);
 
     // Generate tokens
     const jwtPayload = {
@@ -181,9 +173,7 @@ const resendVerificationEmail = async (email: string) => {
 };
 
 const getUserById = async (userId: string) => {
-    const user = await UserModel.findOne({ _id: userId, isDeleted: false })
-        .select("-password")
-        .populate("referredBy", "name email referralCode profileImage");
+    const user = await UserModel.findOne({ _id: userId, isDeleted: false }).select("-password").populate("referredBy", "name email referralCode profileImage");
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
     return user;
 };
@@ -297,11 +287,7 @@ const resetPassword = async (token: string, newPassword: string) => {
     await user.save();
 
     // Log password reset activity
-    activityServices.logActivity(
-        user._id.toString(),
-        ActivityType.PASSWORD_CHANGE,
-        "Reset password via email token"
-    );
+    activityServices.logActivity(user._id.toString(), ActivityType.PASSWORD_CHANGE, "Reset password via email token");
 };
 
 const updateProfile = async (userId: string, data: any) => {
@@ -314,32 +300,9 @@ const updateProfile = async (userId: string, data: any) => {
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
 
     // Log profile update activity
-    activityServices.logActivity(
-        userId,
-        ActivityType.PROFILE_UPDATE,
-        "Updated profile information"
-    );
+    activityServices.logActivity(userId, ActivityType.PROFILE_UPDATE, "Updated profile information");
 
     return user;
-};
-
-const changePassword = async (userId: string, currentPassword: string, newPassword: string) => {
-    const user = await UserModel.findOne({ _id: userId, isDeleted: false });
-    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not registered");
-
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.password as string);
-    if (!isPasswordValid) throw new ApiError(httpStatus.BAD_REQUEST, "Incorrect current password");
-
-    const hashedPassword = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
-    user.password = hashedPassword;
-    await user.save();
-
-    // Log password change activity
-    activityServices.logActivity(
-        userId,
-        ActivityType.PASSWORD_CHANGE,
-        "Changed password via account settings"
-    );
 };
 
 const updateEmail = async (userId: string, newEmail: string, password: string) => {
@@ -429,33 +392,12 @@ const deleteUser = async (userId: string) => {
     return user;
 };
 
-const changeUserRole = async (userId: string, role: UserRole) => {
-    const validRoles: UserRole[] = ["SUPER_ADMIN", "ADMIN", "SELLER", "CUSTOMER"];
-    if (!validRoles.includes(role)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid user role");
-    }
-
-    const user = await UserModel.findOneAndUpdate(
-        { _id: userId, isDeleted: false },
-        { $set: { role } },
-        { new: true }
-    ).select("-password");
-
-    if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not found");
-
-    return user;
-};
-
 const addFcmToken = async (userId: string, token: string) => {
     if (!token) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Token is required");
     }
 
-    const user = await UserModel.findOneAndUpdate(
-        { _id: userId, isDeleted: false },
-        { $addToSet: { fcmTokens: token } },
-        { new: true }
-    ).select("-password");
+    const user = await UserModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { $addToSet: { fcmTokens: token } }, { new: true }).select("-password");
 
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");
@@ -476,12 +418,10 @@ export const authServices = {
     resendOtp,
     resetPassword,
     updateProfile,
-    changePassword,
     updateEmail,
     resendEmailUpdate,
     verifyNewEmail,
     setUserPassword,
     deleteUser,
-    changeUserRole,
     addFcmToken,
 };

@@ -19,7 +19,6 @@ router.post("/reset-password", authControllers.resetPassword);
 router.get("/me", auth, authControllers.getMe);
 router.post("/logout", auth, authControllers.logout);
 router.patch("/profile", auth, authControllers.updateProfile);
-router.post("/change-password", auth, authControllers.changePassword);
 router.post("/update-email", auth, authControllers.updateEmail);
 router.get("/verify-new-email", authControllers.verifyNewEmail);
 router.post("/resend-email-update", auth, authControllers.resendEmailUpdate);
@@ -29,6 +28,5 @@ router.patch("/fcm-token", auth, authControllers.addFcmToken);
 // Admin only routes
 router.post("/set-password/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), authControllers.setUserPassword);
 router.delete("/:userId", auth, authorize(["SUPER_ADMIN", "ADMIN"]), authControllers.deleteUserByAdmin);
-router.patch("/change-role/:userId", auth, authorize(["SUPER_ADMIN"]), authControllers.changeUserRole);
 
 export const authRoutes = router;
