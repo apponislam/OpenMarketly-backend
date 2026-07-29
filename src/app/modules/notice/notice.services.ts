@@ -70,15 +70,22 @@ const getNoticeById = async (id: string) => {
     return notice;
 };
 
-const getDefaultNotice = async () => {
-    // Find the default active notice
-    const notice = await NoticeModel.findOne({
-        isDefault: true,
-        isActive: true,
-        isDeleted: false,
-    });
+const getDefaultNotice = async (seen: boolean) => {
+    if (seen) {
+        return null;
+    }
+    try {
+        // Find the default active notice
+        const notice = await NoticeModel.findOne({
+            isDefault: true,
+            isActive: true,
+            isDeleted: false,
+        });
 
-    return notice;
+        return notice;
+    } catch (error) {
+        return null;
+    }
 };
 
 const updateNotice = async (id: string, data: Partial<INotice>) => {

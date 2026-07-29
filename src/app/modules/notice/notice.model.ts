@@ -44,6 +44,8 @@ const NoticeSchema = new Schema<INotice>(noticeSchemaDefinition, {
 });
 
 // Indexes
-NoticeSchema.index({ isActive: 1, isDeleted: 1, isDefault: 1 });
+NoticeSchema.index({ isDeleted: 1, isActive: 1, isDefault: 1 });
+NoticeSchema.index({ isDeleted: 1, type: 1 });
+NoticeSchema.index({ isDeleted: 1, isActive: 1, createdAt: -1 });
 
 export const NoticeModel = mongoose.model<INotice>("Notice", NoticeSchema);

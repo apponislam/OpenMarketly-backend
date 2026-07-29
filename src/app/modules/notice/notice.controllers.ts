@@ -40,7 +40,8 @@ const getNoticeById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getDefaultNotice = catchAsync(async (req: Request, res: Response) => {
-    const result = await noticeServices.getDefaultNotice();
+    const seen = req.query.seen === "true";
+    const result = await noticeServices.getDefaultNotice(seen);
 
     sendResponse(res, {
         statusCode: httpStatus.OK,
