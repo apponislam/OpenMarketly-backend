@@ -8,7 +8,7 @@ const addProductToRecentlyViewed = async (userId: string, productIds: string | s
         await RecentlyViewedModel.findOneAndUpdate(
             { user: userId, product: productId },
             { viewedAt: new Date() },
-            { upsert: true, new: true }
+            { upsert: true, returnDocument: 'after' }
         );
     }
 

@@ -36,7 +36,7 @@ const updateSettings = async (data: Partial<ISiteSettings>, userId: string) => {
     const updatedSettings = await SettingsModel.findByIdAndUpdate(
         settings._id,
         { $set: data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     // Log settings update

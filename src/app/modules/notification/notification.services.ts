@@ -31,7 +31,7 @@ const markAsRead = async (notificationId: string, userId: string) => {
     const notification = await NotificationModel.findOneAndUpdate(
         { _id: new Types.ObjectId(notificationId), user: new Types.ObjectId(userId) },
         { isRead: true },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (!notification) {

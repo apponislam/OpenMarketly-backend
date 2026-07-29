@@ -31,7 +31,7 @@ const createOrUpdateRating = async (userId: string, data: Partial<IRating>) => {
                 isDeleted: false,
             },
         },
-        { new: true, upsert: true, runValidators: true }
+        { returnDocument: 'after', upsert: true, runValidators: true }
     ).populate("user", "name profileImage");
 
     // Recalculate and update stats on the product
@@ -116,7 +116,7 @@ const deleteRating = async (id: string, userId: string, userRole: string) => {
     const deletedRating = await RatingModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (deletedRating) {

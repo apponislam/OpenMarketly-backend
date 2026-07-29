@@ -264,7 +264,7 @@ const updateProduct = async (id: string, sellerId: string, userRole: string, dat
         delete (data as any).removeImages;
     }
 
-    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, updateQuery, { new: true, runValidators: true }).populate("category", "name slug").populate("seller", "name email profileImage");
+    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, updateQuery, { returnDocument: 'after', runValidators: true }).populate("category", "name slug").populate("seller", "name email profileImage");
 
     if (updatedProduct) {
         // Log product update activity
@@ -285,7 +285,7 @@ const deleteProduct = async (id: string, sellerId: string, userRole: string) => 
         throw new ApiError(httpStatus.FORBIDDEN, "You do not have permission to delete this product");
     }
 
-    const deletedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { isDeleted: true } }, { new: true });
+    const deletedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { isDeleted: true } }, { returnDocument: 'after' });
 
     if (deletedProduct) {
         // Log product deletion activity
@@ -301,7 +301,7 @@ const approveProduct = async (id: string, approvalStatus: ProductApprovalStatus,
         throw new ApiError(httpStatus.NOT_FOUND, "Product not found");
     }
 
-    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { approvalStatus, adminRemarks } }, { new: true }).populate("category", "name slug").populate("seller", "name email profileImage");
+    const updatedProduct = await ProductModel.findOneAndUpdate({ _id: id, isDeleted: false }, { $set: { approvalStatus, adminRemarks } }, { returnDocument: 'after' }).populate("category", "name slug").populate("seller", "name email profileImage");
 
     if (updatedProduct) {
         activityServices.logActivity(adminId, ActivityType.PRODUCT_UPDATE, `Updated product status to ${approvalStatus} for: ${updatedProduct.name}`);

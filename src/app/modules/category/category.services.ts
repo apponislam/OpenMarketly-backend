@@ -95,7 +95,7 @@ const updateCategory = async (id: string, data: Partial<ICategory>, userId: stri
     const category = await CategoryModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     if (!category) {
@@ -116,7 +116,7 @@ const deleteCategory = async (id: string, userId: string) => {
     const category = await CategoryModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (!category) {

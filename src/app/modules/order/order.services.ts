@@ -301,7 +301,7 @@ const handlePaymentSuccess = async (tran_id: string, val_id: string) => {
 };
 
 const handlePaymentFail = async (tran_id: string) => {
-    const order = await OrderModel.findOneAndUpdate({ transactionId: tran_id }, { $set: { paymentStatus: "FAILED", orderStatus: "CANCELLED" } }, { new: true });
+    const order = await OrderModel.findOneAndUpdate({ transactionId: tran_id }, { $set: { paymentStatus: "FAILED", orderStatus: "CANCELLED" } }, { returnDocument: 'after' });
     if (!order) {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }
@@ -321,7 +321,7 @@ const handlePaymentFail = async (tran_id: string) => {
 };
 
 const handlePaymentCancel = async (tran_id: string) => {
-    const order = await OrderModel.findOneAndUpdate({ transactionId: tran_id }, { $set: { paymentStatus: "CANCELLED", orderStatus: "CANCELLED" } }, { new: true });
+    const order = await OrderModel.findOneAndUpdate({ transactionId: tran_id }, { $set: { paymentStatus: "CANCELLED", orderStatus: "CANCELLED" } }, { returnDocument: 'after' });
     if (!order) {
         throw new ApiError(httpStatus.NOT_FOUND, "Order not found");
     }

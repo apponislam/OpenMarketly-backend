@@ -177,7 +177,7 @@ const clearCart = async (userId: string) => {
     const cart = await CartModel.findOneAndUpdate(
         { user: userId },
         { $set: { items: [], totalPrice: 0 } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     // Log cart clear activity

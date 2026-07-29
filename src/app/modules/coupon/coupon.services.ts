@@ -147,7 +147,7 @@ const updateCoupon = async (id: string, data: Partial<ICoupon>, userId: string) 
     const coupon = await CouponModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     if (!coupon) {
@@ -168,7 +168,7 @@ const deleteCoupon = async (id: string, userId: string) => {
     const coupon = await CouponModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (!coupon) {

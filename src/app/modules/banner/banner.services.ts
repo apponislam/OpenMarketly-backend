@@ -79,7 +79,7 @@ const updateBanner = async (id: string, data: Partial<IBanner>) => {
     const updatedBanner = await BannerModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     return updatedBanner;
@@ -94,7 +94,7 @@ const deleteBanner = async (id: string) => {
     const deletedBanner = await BannerModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     return deletedBanner;

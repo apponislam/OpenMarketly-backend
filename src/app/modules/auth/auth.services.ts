@@ -401,7 +401,7 @@ const setUserPassword = async (userId: string, newPassword: string) => {
 };
 
 const deleteUser = async (userId: string) => {
-    const user = await UserModel.findByIdAndUpdate(userId, { $set: { isDeleted: true } }, { new: true });
+    const user = await UserModel.findByIdAndUpdate(userId, { $set: { isDeleted: true } }, { returnDocument: 'after' });
     if (!user) throw new ApiError(httpStatus.NOT_FOUND, "User not found");
 
     return user;
@@ -412,7 +412,7 @@ const addFcmToken = async (userId: string, token: string) => {
         throw new ApiError(httpStatus.BAD_REQUEST, "Token is required");
     }
 
-    const user = await UserModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { $addToSet: { fcmTokens: token } }, { new: true }).select("-password");
+    const user = await UserModel.findOneAndUpdate({ _id: userId, isDeleted: false }, { $addToSet: { fcmTokens: token } }, { returnDocument: 'after' }).select("-password");
 
     if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, "User not found");

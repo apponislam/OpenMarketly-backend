@@ -105,7 +105,7 @@ const updateFaq = async (id: string, data: Partial<IFaq>, userId: string) => {
     const faq = await FaqModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: data },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     if (!faq) {
@@ -126,7 +126,7 @@ const deleteFaq = async (id: string, userId: string) => {
     const faq = await FaqModel.findOneAndUpdate(
         { _id: id, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (!faq) {

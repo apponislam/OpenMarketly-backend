@@ -21,7 +21,7 @@ const createOrUpdatePolicy = async (data: Partial<IPolicy>, userId: string) => {
                 isDeleted: false,
             },
         },
-        { new: true, upsert: true, runValidators: true }
+        { returnDocument: 'after', upsert: true, runValidators: true }
     );
 
     // Log policy update
@@ -61,7 +61,7 @@ const deletePolicy = async (type: string, userId: string) => {
     const policy = await PolicyModel.findOneAndUpdate(
         { type: type.toUpperCase() as PolicyType, isDeleted: false },
         { $set: { isDeleted: true } },
-        { new: true }
+        { returnDocument: 'after' }
     );
 
     if (!policy) {

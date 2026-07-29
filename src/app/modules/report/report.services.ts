@@ -120,7 +120,7 @@ const resolveReport = async (
                 adminNote: adminNote || `Status updated to ${status} by Admin`,
             },
         },
-        { new: true, runValidators: true }
+        { returnDocument: 'after', runValidators: true }
     );
 
     if (!report) {
