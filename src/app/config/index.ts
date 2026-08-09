@@ -28,8 +28,10 @@ export default {
         smtp_pass: process.env.SMTP_PASS,
     },
 
-    superAdminPassword: process.env.SUPERADMINPASSWORD,
-    superAdminEmail: process.env.SUPERADMINEMAIL,
+    initial_admin_name: process.env.INITIAL_ADMIN_NAME,
+    initial_admin_email: process.env.INITIAL_ADMIN_EMAIL,
+    initial_admin_password: process.env.INITIAL_ADMIN_PASSWORD,
+    initial_admin_phone: process.env.INITIAL_ADMIN_PHONE,
     maps_api_key: process.env.MAPS_API_KEY,
     ssl: {
         store_id: process.env.SSL_STORE_ID,
