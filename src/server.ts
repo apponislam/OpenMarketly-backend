@@ -9,7 +9,10 @@ import seedSettings from "./app/modules/settings/settings.seed";
 
 let server: Server;
 
-dns.setServers(["8.8.8.8", "8.8.4.4"]);
+// Only force custom DNS in local development if needed, never in serverless/Vercel
+if (process.env.NODE_ENV === "development" && process.env.USE_CUSTOM_DNS === "true") {
+    dns.setServers(["8.8.8.8", "8.8.4.4"]);
+}
 
 async function main() {
     try {
