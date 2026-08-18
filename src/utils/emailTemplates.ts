@@ -1,4 +1,4 @@
-import { sendMail } from "./nodemailer";
+import { sendMail } from "./sendMail";
 
 export const sendVerificationEmail = (email: string, name: string, otp: string) => {
     const html = `
