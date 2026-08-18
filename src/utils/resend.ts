@@ -1,7 +1,18 @@
 import { Resend } from "resend";
 import config from "../app/config";
 
-export const resend = new Resend(config.mail.resend_api_key);
+let resendClient: Resend | null = null;
+
+export const getResendClient = (): Resend => {
+    if (!resendClient) {
+        const apiKey = config.mail.resend_api_key;
+        if (!apiKey) {
+            throw new Error("Missing RESEND_API_KEY in environment variables.");
+        }
+        resendClient = new Resend(apiKey);
+    }
+    return resendClient;
+};
 
 export interface ISendEmailPayload {
     to: string | string[];
@@ -22,6 +33,7 @@ export const sendEmailWithResend = async (payload: ISendEmailPayload) => {
 
     try {
         const sender = from || config.mail.from_email || "";
+        const resend = getResendClient();
         const data = await resend.emails.send({
             from: sender,
             to: Array.isArray(to) ? to : [to],
